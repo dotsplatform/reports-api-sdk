@@ -2,6 +2,7 @@ includes:
     - vendor/phpstan/phpstan-strict-rules/rules.neon
     - vendor/phpstan/phpstan-phpunit/extension.neon
     - vendor/phpstan/phpstan-phpunit/rules.neon
+    - vendor/phpstan/phpstan/conf/bleedingEdge.neon
 
 parameters:
     # The highest level. Never lower it, never add a baseline file.
@@ -25,3 +26,10 @@ parameters:
     reportPossiblyNonexistentConstantArrayOffset: true
     checkMissingCallableSignature: true
     checkTooWideReturnTypesInProtectedAndPublicMethods: true
+
+    ignoreErrors:
+        # Tests read result lists by the offsets they just asserted (assertCount / fixtures); "offset might not
+        # exist" stays enforced in src, where it matters. Same rule as the reports service.
+        -
+            identifier: offsetAccess.notFound
+            path: tests/*
