@@ -16,6 +16,7 @@ namespace Dotsplatform\ReportsApi\Tests;
 
 use ArrayObject;
 use Dotsplatform\ReportsApi\Clients\ReportsHttpClient;
+use Dotsplatform\ReportsApi\Http\ReportsHttpTimeouts;
 use Dotsplatform\ReportsApi\Http\ReportsHttpTransport;
 use Dotsplatform\ReportsApi\Http\RequestHeader;
 use GuzzleHttp\Handler\MockHandler;
@@ -72,7 +73,7 @@ abstract class HttpClientTestCase extends TestCase
         $historyContainer = $this->history;
         $handlerStack->push(Middleware::history($historyContainer));
 
-        return new ReportsHttpTransport($host, $token, 5.0, $handlerStack);
+        return new ReportsHttpTransport($host, $token, new ReportsHttpTimeouts(), $handlerStack);
     }
 
     /**
@@ -93,6 +94,16 @@ abstract class HttpClientTestCase extends TestCase
     protected function queueNoContentResponse(): void
     {
         $this->mockHandler->append(new Response(204));
+    }
+
+    /**
+     * The handler gets the request and the Guzzle options, so a test can read the timeouts.
+     *
+     * @param  callable(RequestInterface, array<string, mixed>): mixed  $handler
+     */
+    protected function queueHandler(callable $handler): void
+    {
+        $this->mockHandler->append($handler);
     }
 
     protected function queueThrowable(Throwable $throwable): void

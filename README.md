@@ -15,7 +15,9 @@ php artisan vendor:publish --tag=reports-api-sdk-config
 |---|---|---|
 | `host` | `REPORTS_SERVER_HOST` | Base URL of the reports service, e.g. `https://reports.dotsplatform.com` |
 | `token` | `INTERNAL_GATEWAY_TOKEN` | The shared secret of every Dots service |
-| `timeout_seconds` | – | Guzzle timeout, 30 by default |
+| `connect_timeout` | – | Seconds to connect, 2 by default |
+| `timeout` | – | Seconds for a whole JSON request, 8 by default |
+| `pdf_timeout` | – | Seconds for a PDF download, 30 by default |
 
 Every request sends `X-Internal-Gateway-Token: <token>`. The reports service answers **401** without it. See
 `livesite/ai/2026-09/DEV-18603-microservices-auth-middleware/internal-request-authorization.md`.

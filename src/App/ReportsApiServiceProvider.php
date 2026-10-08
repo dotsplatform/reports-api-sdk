@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Dotsplatform\ReportsApi;
 
 use Dotsplatform\ReportsApi\Clients\ReportsHttpClient;
+use Dotsplatform\ReportsApi\Http\ReportsHttpTimeouts;
 use Dotsplatform\ReportsApi\Http\ReportsHttpTransport;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Support\ServiceProvider;
@@ -47,7 +48,16 @@ class ReportsApiServiceProvider extends ServiceProvider
         return new ReportsHttpTransport(
             $this->readString($config, 'host'),
             $this->readString($config, 'token'),
-            $this->readTimeoutSeconds($config),
+            $this->makeTimeouts($config),
+        );
+    }
+
+    private function makeTimeouts(ConfigRepository $config): ReportsHttpTimeouts
+    {
+        return new ReportsHttpTimeouts(
+            $this->readSeconds($config, 'connect_timeout', ReportsHttpTimeouts::DEFAULT_CONNECT_SECONDS),
+            $this->readSeconds($config, 'timeout', ReportsHttpTimeouts::DEFAULT_REQUEST_SECONDS),
+            $this->readSeconds($config, 'pdf_timeout', ReportsHttpTimeouts::DEFAULT_PDF_SECONDS),
         );
     }
 
@@ -66,11 +76,11 @@ class ReportsApiServiceProvider extends ServiceProvider
         return $value;
     }
 
-    private function readTimeoutSeconds(ConfigRepository $config): float
+    private function readSeconds(ConfigRepository $config, string $key, float $defaultSeconds): float
     {
-        $value = $config->get(self::CONFIG_KEY.'.timeout_seconds');
+        $value = $config->get(self::CONFIG_KEY.'.'.$key);
         if (! is_numeric($value)) {
-            return 30.0;
+            return $defaultSeconds;
         }
 
         return (float) $value;

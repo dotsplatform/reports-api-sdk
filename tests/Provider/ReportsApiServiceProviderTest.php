@@ -30,7 +30,9 @@ class ReportsApiServiceProviderTest extends TestCase
     {
         $this->assertSame('https://reports.example.test', config('reports-server.host'));
         $this->assertSame('internal-gateway-secret', config('reports-server.token'));
-        $this->assertSame(30, config('reports-server.timeout_seconds'));
+        $this->assertSame(2, config('reports-server.connect_timeout'));
+        $this->assertSame(8, config('reports-server.timeout'));
+        $this->assertSame(30, config('reports-server.pdf_timeout'));
     }
 
     public function testTheClientIsTheHttpClient(): void

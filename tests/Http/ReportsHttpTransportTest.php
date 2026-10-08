@@ -39,13 +39,12 @@ class ReportsHttpTransportTest extends HttpClientTestCase
         $transport->putJson('api/v1/c', ['x' => 1]);
         $transport->patchJson('api/v1/d', ['x' => 1]);
         $transport->delete('api/v1/e');
-        $transport->getBinary('api/v1/f');
+        $transport->getPdf('api/v1/f');
 
         $methods = [];
         foreach ($this->getRecordedRequests() as $request) {
             $methods[] = $request->getMethod();
             $this->assertSame(self::TOKEN, $request->getHeaderLine(RequestHeader::INTERNAL_GATEWAY_TOKEN));
-            $this->assertSame('application/json', $request->getHeaderLine('Accept'));
         }
 
         $this->assertSame(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'GET'], $methods);

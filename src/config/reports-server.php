@@ -10,5 +10,8 @@ declare(strict_types=1);
 return [
     'host' => env('REPORTS_SERVER_HOST', ''),
     'token' => env('INTERNAL_GATEWAY_TOKEN', ''),
-    'timeout_seconds' => 30,
+    // Seconds. A JSON call answers fast; the PDF download streams a file.
+    'connect_timeout' => 2,
+    'timeout' => 8,
+    'pdf_timeout' => 30,
 ];

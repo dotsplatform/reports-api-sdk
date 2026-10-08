@@ -6,8 +6,9 @@ declare(strict_types=1);
  * Description of ReportsHttpTransport.php
  *
  * The only place that talks HTTP to the reports service. Every request carries X-Internal-Gateway-Token
- * (config reports-server.token) and, for write calls, the optional X-Actor-Id. Error statuses become typed
- * exceptions (ErrorResponseMapper); a missing response becomes ReportsConnectionException.
+ * (config reports-server.token) and, for write calls, the optional X-Actor-Id. Every request has a connect and a
+ * total timeout (ReportsHttpTimeouts); the PDF download has its own, longer one. Error statuses become typed
+ * exceptions (ErrorResponseMapper); a missing response, a timeout included, becomes ReportsConnectionException.
  *
  * The Guzzle handler stack can be passed in, so tests run against a MockHandler.
  *
@@ -40,14 +41,21 @@ class ReportsHttpTransport
 
     private const int FIRST_ERROR_STATUS = 400;
 
+    private const string ACCEPT_JSON = 'application/json';
+
+    private const string ACCEPT_PDF = 'application/pdf, application/json';
+
     private ?GuzzleClient $guzzleClient = null;
+
+    private readonly ReportsHttpTimeouts $timeouts;
 
     public function __construct(
         private readonly string $host,
         private readonly string $token,
-        private readonly float $timeoutSeconds = 30.0,
+        ?ReportsHttpTimeouts $timeouts = null,
         private readonly ?HandlerStack $handlerStack = null,
     ) {
+        $this->timeouts = $timeouts ?? new ReportsHttpTimeouts();
     }
 
     /**
@@ -113,11 +121,12 @@ class ReportsHttpTransport
     }
 
     /**
-     * The raw response body, for file downloads (PDF).
+     * The raw response body of a PDF download, with the longer PDF timeout.
      */
-    public function getBinary(string $path): string
+    public function getPdf(string $path): string
     {
-        $response = $this->send(self::METHOD_GET, $path, [], null);
+        $options = [RequestOptions::TIMEOUT => $this->timeouts->getPdfSeconds()];
+        $response = $this->send(self::METHOD_GET, $path, $options, null, self::ACCEPT_PDF);
 
         return (string) $response->getBody();
     }
@@ -125,13 +134,14 @@ class ReportsHttpTransport
     /**
      * @param  array<string, mixed>  $options
      */
-    private function send(string $method, string $path, array $options, ?string $actorId): ResponseInterface
+    private function send(string $method, string $path, array $options, ?string $actorId, string $accept = self::ACCEPT_JSON): ResponseInterface
     {
-        $options[RequestOptions::HEADERS] = $this->buildHeaders($actorId);
+        $options[RequestOptions::HEADERS] = $this->buildHeaders($actorId, $accept);
 
         try {
             $response = $this->getGuzzleClient()->request($method, $path, $options);
         } catch (GuzzleException $exception) {
+            // A connect or request timeout is a ConnectException (cURL error 28), so it lands here as well.
             throw new ReportsConnectionException('The reports service could not be reached: '.$exception->getMessage(), 0, '', $exception);
         }
 
@@ -145,10 +155,10 @@ class ReportsHttpTransport
     /**
      * @return array<string, string>
      */
-    private function buildHeaders(?string $actorId): array
+    private function buildHeaders(?string $actorId, string $accept): array
     {
         $headers = [
-            'Accept' => 'application/json',
+            'Accept' => $accept,
             RequestHeader::INTERNAL_GATEWAY_TOKEN => $this->getConfiguredToken(),
         ];
 
@@ -167,7 +177,8 @@ class ReportsHttpTransport
 
         $options = [
             'base_uri' => $this->getBaseUri(),
-            RequestOptions::TIMEOUT => $this->timeoutSeconds,
+            RequestOptions::CONNECT_TIMEOUT => $this->timeouts->getConnectSeconds(),
+            RequestOptions::TIMEOUT => $this->timeouts->getRequestSeconds(),
             // Error statuses are mapped to typed exceptions in send().
             RequestOptions::HTTP_ERRORS => false,
         ];

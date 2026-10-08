@@ -68,7 +68,7 @@ class ReportRunsHttpClient implements ReportRunsClient
     {
         $path = $this->transport->buildPath(self::RUN_PDF_URL_TEMPLATE, $accountId, $definitionId, $runId);
 
-        return $this->transport->getBinary($path);
+        return $this->transport->getPdf($path);
     }
 
     public function createShareLink(string $accountId, string $definitionId, ReportPeriodRequestDTO $request, ?string $actorId = null): ShareLinkDTO
