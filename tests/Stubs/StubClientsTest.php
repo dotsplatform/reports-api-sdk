@@ -101,7 +101,7 @@ class StubClientsTest extends TestCase
 
         $this->assertCount(1, $reportsClient->operations()->listTemplates());
         $this->assertSame(1, $reportsClient->operations()->queueBackfill(self::ACCOUNT, BackfillRequestDTO::empty()));
-        $this->assertSame(1, $reportsClient->operations()->queueReaggregation(ReaggregationRequestDTO::empty()));
+        $this->assertSame('queued', $reportsClient->operations()->queueReaggregation(ReaggregationRequestDTO::empty()));
     }
 
     /**

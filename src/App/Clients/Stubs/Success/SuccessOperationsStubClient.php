@@ -5,7 +5,8 @@ declare(strict_types=1);
 /**
  * Description of SuccessOperationsStubClient.php
  *
- * Answers every operations call with StubResponses data, no HTTP: one template, one queued chunk or job.
+ * Answers every operations call with StubResponses data, no HTTP: one template, one queued backfill chunk, a
+ * queued re-aggregation.
  *
  * @copyright Copyright (c) DOTSPLATFORM, LLC
  * @author    Bogdan Mamontov <bohdan.mamontov@dotsplatform.com>
@@ -21,7 +22,9 @@ use Dotsplatform\ReportsApi\DTO\Reports\ReportDefinitionDTO;
 
 class SuccessOperationsStubClient implements OperationsClient
 {
-    private const int QUEUED_COUNT = 1;
+    private const int QUEUED_CHUNKS_COUNT = 1;
+
+    private const string QUEUED_STATUS = 'queued';
 
     public function listTemplates(): array
     {
@@ -30,11 +33,11 @@ class SuccessOperationsStubClient implements OperationsClient
 
     public function queueBackfill(string $accountId, BackfillRequestDTO $request, ?string $actorId = null): int
     {
-        return self::QUEUED_COUNT;
+        return self::QUEUED_CHUNKS_COUNT;
     }
 
-    public function queueReaggregation(ReaggregationRequestDTO $request, ?string $actorId = null): int
+    public function queueReaggregation(ReaggregationRequestDTO $request, ?string $actorId = null): string
     {
-        return self::QUEUED_COUNT;
+        return self::QUEUED_STATUS;
     }
 }

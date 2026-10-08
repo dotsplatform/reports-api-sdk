@@ -29,7 +29,7 @@ class FailOperationsStubClient implements OperationsClient
         throw StubFailure::make();
     }
 
-    public function queueReaggregation(ReaggregationRequestDTO $request, ?string $actorId = null): int
+    public function queueReaggregation(ReaggregationRequestDTO $request, ?string $actorId = null): string
     {
         throw StubFailure::make();
     }

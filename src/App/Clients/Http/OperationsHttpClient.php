@@ -46,10 +46,10 @@ class OperationsHttpClient implements OperationsClient
         return ResponseField::int(ResponseField::array($response, 'data'), 'queued_chunks');
     }
 
-    public function queueReaggregation(ReaggregationRequestDTO $request, ?string $actorId = null): int
+    public function queueReaggregation(ReaggregationRequestDTO $request, ?string $actorId = null): string
     {
         $response = $this->transport->postJson(self::QUEUE_REAGGREGATION_URL, $request->toRequestBody(), $actorId);
 
-        return ResponseField::int(ResponseField::array($response, 'data'), 'queued_jobs');
+        return ResponseField::string(ResponseField::array($response, 'data'), 'status');
     }
 }

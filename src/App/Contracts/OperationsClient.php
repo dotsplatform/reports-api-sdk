@@ -30,7 +30,9 @@ interface OperationsClient
     public function queueBackfill(string $accountId, BackfillRequestDTO $request, ?string $actorId = null): int;
 
     /**
-     * @return int the number of queued re-aggregation jobs
+     * The service queues the fan-out in one job and answers right away.
+     *
+     * @return string the queue status ("queued")
      */
-    public function queueReaggregation(ReaggregationRequestDTO $request, ?string $actorId = null): int;
+    public function queueReaggregation(ReaggregationRequestDTO $request, ?string $actorId = null): string;
 }

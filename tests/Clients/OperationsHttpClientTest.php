@@ -49,10 +49,10 @@ class OperationsHttpClientTest extends HttpClientTestCase
 
     public function testQueuesAReaggregation(): void
     {
-        $this->queueJsonResponse(['data' => ['queued_jobs' => 3]], 202);
-        $this->queueJsonResponse(['data' => ['queued_jobs' => 120]], 202);
+        $this->queueJsonResponse(['data' => ['status' => 'queued']], 202);
+        $this->queueJsonResponse(['data' => ['status' => 'queued']], 202);
 
-        $queuedJobs = $this->makeClient()->operations()->queueReaggregation(ReaggregationRequestDTO::fromArray([
+        $status = $this->makeClient()->operations()->queueReaggregation(ReaggregationRequestDTO::fromArray([
             'accountIds' => [StubResponses::ACCOUNT_ID],
             'fromDate' => '2026-09-01',
             'toDate' => '2026-09-30',
@@ -66,9 +66,9 @@ class OperationsHttpClientTest extends HttpClientTestCase
             'to' => '2026-09-30',
             'grains' => ['day', 'month'],
         ], $this->getLastRequestJson());
-        $this->assertSame(3, $queuedJobs);
+        $this->assertSame('queued', $status);
 
-        $this->assertSame(120, $this->makeClient()->operations()->queueReaggregation(ReaggregationRequestDTO::empty()));
+        $this->assertSame('queued', $this->makeClient()->operations()->queueReaggregation(ReaggregationRequestDTO::empty()));
         $this->assertSame('{}', $this->getLastRequestRawBody());
     }
 }
