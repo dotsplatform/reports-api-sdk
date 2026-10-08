@@ -31,11 +31,11 @@ class ReportRunDTO extends DTO
 
     protected PeriodDTO $period;
 
-    protected ?CompareMode $compare = null;
+    protected ?string $compareValue = null;
 
     protected bool $isAnonymised;
 
-    protected ReportRunStatus $status;
+    protected string $statusValue;
 
     protected bool $hasShareLink;
 
@@ -53,9 +53,9 @@ class ReportRunDTO extends DTO
             'definitionId' => ResponseField::string($data, 'definition_id'),
             'scope' => ScopeDTO::fromResponse(ResponseField::array($data, 'scope')),
             'period' => PeriodDTO::fromResponse(ResponseField::array($data, 'period')),
-            'compare' => ResponseField::nullableEnum($data, 'compare', CompareMode::class),
+            'compareValue' => ResponseField::nullableString($data, 'compare'),
             'isAnonymised' => ResponseField::bool($data, 'is_anonymised'),
-            'status' => ResponseField::enum($data, 'status', ReportRunStatus::class),
+            'statusValue' => ResponseField::string($data, 'status'),
             'hasShareLink' => ResponseField::bool($data, 'has_share_link'),
             'expiresAt' => ResponseField::nullableInt($data, 'expires_at'),
             'createdAt' => ResponseField::int($data, 'created_at'),
@@ -82,9 +82,24 @@ class ReportRunDTO extends DTO
         return $this->period;
     }
 
+    /**
+     * The raw value, also when this SDK version does not know it.
+     */
+    public function getCompareValue(): ?string
+    {
+        return $this->compareValue;
+    }
+
+    /**
+     * Null without a value, or when the service sends one this SDK version does not know (see getCompareValue()).
+     */
     public function getCompare(): ?CompareMode
     {
-        return $this->compare;
+        if ($this->compareValue === null) {
+            return null;
+        }
+
+        return CompareMode::tryFrom($this->compareValue);
     }
 
     public function isAnonymised(): bool
@@ -92,14 +107,25 @@ class ReportRunDTO extends DTO
         return $this->isAnonymised;
     }
 
-    public function getStatus(): ReportRunStatus
+    /**
+     * The raw value, also when this SDK version does not know it.
+     */
+    public function getStatusValue(): string
     {
-        return $this->status;
+        return $this->statusValue;
+    }
+
+    /**
+     * Null when the service sends a value this SDK version does not know (see getStatusValue()).
+     */
+    public function getStatus(): ?ReportRunStatus
+    {
+        return ReportRunStatus::tryFrom($this->statusValue);
     }
 
     public function isPdfReady(): bool
     {
-        return $this->status === ReportRunStatus::PDF_READY;
+        return $this->getStatus() === ReportRunStatus::PDF_READY;
     }
 
     public function hasShareLink(): bool

@@ -14,7 +14,6 @@ declare(strict_types=1);
 
 namespace Dotsplatform\ReportsApi\Support;
 
-use BackedEnum;
 use Dotsplatform\ReportsApi\Exceptions\ReportsUnexpectedResponseException;
 
 final class ResponseField
@@ -268,40 +267,6 @@ final class ResponseField
         }
 
         return $map;
-    }
-
-    /**
-     * @template TEnum of BackedEnum
-     *
-     * @param  array<array-key, mixed>  $data
-     * @param  class-string<TEnum>  $enumClass
-     * @return TEnum
-     */
-    public static function enum(array $data, string $key, string $enumClass): BackedEnum
-    {
-        $value = self::string($data, $key);
-        $case = $enumClass::tryFrom($value);
-        if ($case === null) {
-            throw new ReportsUnexpectedResponseException(sprintf('The reports service response field "%s" has an unknown value "%s".', $key, $value));
-        }
-
-        return $case;
-    }
-
-    /**
-     * @template TEnum of BackedEnum
-     *
-     * @param  array<array-key, mixed>  $data
-     * @param  class-string<TEnum>  $enumClass
-     * @return TEnum|null
-     */
-    public static function nullableEnum(array $data, string $key, string $enumClass): ?BackedEnum
-    {
-        if (self::nullableString($data, $key) === null) {
-            return null;
-        }
-
-        return self::enum($data, $key, $enumClass);
     }
 
     private static function unexpectedType(string $key, string $expectedType): ReportsUnexpectedResponseException

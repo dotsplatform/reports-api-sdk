@@ -20,14 +20,14 @@ use Dotsplatform\ReportsApi\Support\ResponseField;
 
 class ScopeDTO extends DTO
 {
-    protected ScopeType $scopeType;
+    protected string $scopeTypeValue;
 
     protected ?string $scopeId = null;
 
     public static function create(ScopeType $scopeType, ?string $scopeId): static
     {
         return static::fromArray([
-            'scopeType' => $scopeType,
+            'scopeTypeValue' => $scopeType->value,
             'scopeId' => $scopeId,
         ]);
     }
@@ -38,14 +38,25 @@ class ScopeDTO extends DTO
     public static function fromResponse(array $data): static
     {
         return static::fromArray([
-            'scopeType' => ResponseField::enum($data, 'type', ScopeType::class),
+            'scopeTypeValue' => ResponseField::string($data, 'type'),
             'scopeId' => ResponseField::nullableString($data, 'id'),
         ]);
     }
 
-    public function getScopeType(): ScopeType
+    /**
+     * The raw value, also when this SDK version does not know it.
+     */
+    public function getScopeTypeValue(): string
     {
-        return $this->scopeType;
+        return $this->scopeTypeValue;
+    }
+
+    /**
+     * Null when the service sends a value this SDK version does not know (see getScopeTypeValue()).
+     */
+    public function getScopeType(): ?ScopeType
+    {
+        return ScopeType::tryFrom($this->scopeTypeValue);
     }
 
     public function getScopeId(): ?string
@@ -59,7 +70,7 @@ class ScopeDTO extends DTO
     public function toRequestBody(): array
     {
         return [
-            'type' => $this->scopeType->value,
+            'type' => $this->scopeTypeValue,
             'id' => $this->scopeId,
         ];
     }

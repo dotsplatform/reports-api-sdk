@@ -30,9 +30,9 @@ class DeliveryDTO extends DTO
 
     protected string $runId;
 
-    protected SubscriptionChannel $channel;
+    protected string $channelValue;
 
-    protected DeliveryStatus $status;
+    protected string $statusValue;
 
     protected ?string $error = null;
 
@@ -53,8 +53,8 @@ class DeliveryDTO extends DTO
             'recipientEmail' => ResponseField::nullableString($data, 'recipient_email'),
             'sendKey' => ResponseField::string($data, 'send_key'),
             'runId' => ResponseField::string($data, 'run_id'),
-            'channel' => ResponseField::enum($data, 'channel', SubscriptionChannel::class),
-            'status' => ResponseField::enum($data, 'status', DeliveryStatus::class),
+            'channelValue' => ResponseField::string($data, 'channel'),
+            'statusValue' => ResponseField::string($data, 'status'),
             'error' => ResponseField::nullableString($data, 'error'),
             'sentAt' => ResponseField::nullableInt($data, 'sent_at'),
             'deliveredAt' => ResponseField::nullableInt($data, 'delivered_at'),
@@ -93,14 +93,36 @@ class DeliveryDTO extends DTO
         return $this->runId;
     }
 
-    public function getChannel(): SubscriptionChannel
+    /**
+     * The raw value, also when this SDK version does not know it.
+     */
+    public function getChannelValue(): string
     {
-        return $this->channel;
+        return $this->channelValue;
     }
 
-    public function getStatus(): DeliveryStatus
+    /**
+     * Null when the service sends a value this SDK version does not know (see getChannelValue()).
+     */
+    public function getChannel(): ?SubscriptionChannel
     {
-        return $this->status;
+        return SubscriptionChannel::tryFrom($this->channelValue);
+    }
+
+    /**
+     * The raw value, also when this SDK version does not know it.
+     */
+    public function getStatusValue(): string
+    {
+        return $this->statusValue;
+    }
+
+    /**
+     * Null when the service sends a value this SDK version does not know (see getStatusValue()).
+     */
+    public function getStatus(): ?DeliveryStatus
+    {
+        return DeliveryStatus::tryFrom($this->statusValue);
     }
 
     public function getError(): ?string

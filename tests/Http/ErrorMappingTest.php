@@ -132,18 +132,6 @@ class ErrorMappingTest extends HttpClientTestCase
         $this->makeClient()->reportDefinitions()->get(StubResponses::ACCOUNT_ID, StubResponses::DEFINITION_ID);
     }
 
-    public function testAnUnknownEnumValueIsAnUnexpectedResponse(): void
-    {
-        $definition = StubResponses::reportDefinition();
-        $definition['purpose'] = 'billboard';
-        $this->queueJsonResponse(['data' => $definition]);
-
-        $this->expectException(ReportsUnexpectedResponseException::class);
-        $this->expectExceptionMessage('unknown value "billboard"');
-
-        $this->makeClient()->reportDefinitions()->get(StubResponses::ACCOUNT_ID, StubResponses::DEFINITION_ID);
-    }
-
     /**
      * @param  callable(): mixed  $call
      */

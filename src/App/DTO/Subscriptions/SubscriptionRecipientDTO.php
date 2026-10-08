@@ -25,7 +25,7 @@ class SubscriptionRecipientDTO extends DTO
 
     protected ?string $name = null;
 
-    protected RecipientStatus $status;
+    protected string $statusValue;
 
     protected ?int $unsubscribedAt = null;
 
@@ -38,7 +38,7 @@ class SubscriptionRecipientDTO extends DTO
             'id' => ResponseField::string($data, 'id'),
             'email' => ResponseField::string($data, 'email'),
             'name' => ResponseField::nullableString($data, 'name'),
-            'status' => ResponseField::enum($data, 'status', RecipientStatus::class),
+            'statusValue' => ResponseField::string($data, 'status'),
             'unsubscribedAt' => ResponseField::nullableInt($data, 'unsubscribed_at'),
         ]);
     }
@@ -58,14 +58,25 @@ class SubscriptionRecipientDTO extends DTO
         return $this->name;
     }
 
-    public function getStatus(): RecipientStatus
+    /**
+     * The raw value, also when this SDK version does not know it.
+     */
+    public function getStatusValue(): string
     {
-        return $this->status;
+        return $this->statusValue;
+    }
+
+    /**
+     * Null when the service sends a value this SDK version does not know (see getStatusValue()).
+     */
+    public function getStatus(): ?RecipientStatus
+    {
+        return RecipientStatus::tryFrom($this->statusValue);
     }
 
     public function isActive(): bool
     {
-        return $this->status === RecipientStatus::ACTIVE;
+        return $this->getStatus() === RecipientStatus::ACTIVE;
     }
 
     /**

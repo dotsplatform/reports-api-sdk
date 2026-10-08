@@ -28,7 +28,7 @@ class ReportSettingsDTO extends DTO
 
     protected string $currencySign;
 
-    protected CurrencyPosition $currencyPosition;
+    protected string $currencyPositionValue;
 
     protected string $thousandsSeparator;
 
@@ -51,7 +51,7 @@ class ReportSettingsDTO extends DTO
     /** @var list<string> */
     protected array $hiddenBlocks = [];
 
-    protected PlanProfile $planProfile;
+    protected string $planProfileValue;
 
     /**
      * @param  array<array-key, mixed>  $data
@@ -63,7 +63,7 @@ class ReportSettingsDTO extends DTO
             'timezone' => ResponseField::string($data, 'timezone'),
             'currency' => ResponseField::string($data, 'currency'),
             'currencySign' => ResponseField::string($data, 'currency_sign'),
-            'currencyPosition' => ResponseField::enum($data, 'currency_position', CurrencyPosition::class),
+            'currencyPositionValue' => ResponseField::string($data, 'currency_position'),
             'thousandsSeparator' => ResponseField::string($data, 'thousands_separator'),
             'decimalSeparator' => ResponseField::string($data, 'decimal_separator'),
             'valueBandsCents' => ResponseField::intList($data, 'value_bands_cents'),
@@ -72,7 +72,7 @@ class ReportSettingsDTO extends DTO
             'outsideZonesTargetMinutes' => ResponseField::int($data, 'outside_zones_target_minutes'),
             'peakHours' => ResponseField::intList($data, 'peak_hours'),
             'hiddenBlocks' => ResponseField::stringList($data, 'hidden_blocks'),
-            'planProfile' => ResponseField::enum($data, 'plan_profile', PlanProfile::class),
+            'planProfileValue' => ResponseField::string($data, 'plan_profile'),
         ]);
     }
 
@@ -99,9 +99,20 @@ class ReportSettingsDTO extends DTO
         return $this->currencySign;
     }
 
-    public function getCurrencyPosition(): CurrencyPosition
+    /**
+     * The raw value, also when this SDK version does not know it.
+     */
+    public function getCurrencyPositionValue(): string
     {
-        return $this->currencyPosition;
+        return $this->currencyPositionValue;
+    }
+
+    /**
+     * Null when the service sends a value this SDK version does not know (see getCurrencyPositionValue()).
+     */
+    public function getCurrencyPosition(): ?CurrencyPosition
+    {
+        return CurrencyPosition::tryFrom($this->currencyPositionValue);
     }
 
     public function getThousandsSeparator(): string
@@ -165,8 +176,19 @@ class ReportSettingsDTO extends DTO
         return $this->hiddenBlocks;
     }
 
-    public function getPlanProfile(): PlanProfile
+    /**
+     * The raw value, also when this SDK version does not know it.
+     */
+    public function getPlanProfileValue(): string
     {
-        return $this->planProfile;
+        return $this->planProfileValue;
+    }
+
+    /**
+     * Null when the service sends a value this SDK version does not know (see getPlanProfileValue()).
+     */
+    public function getPlanProfile(): ?PlanProfile
+    {
+        return PlanProfile::tryFrom($this->planProfileValue);
     }
 }

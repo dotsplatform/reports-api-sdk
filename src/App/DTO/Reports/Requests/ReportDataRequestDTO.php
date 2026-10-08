@@ -59,7 +59,7 @@ class ReportDataRequestDTO extends DTO
     {
         $query = [];
         if ($this->scope !== null) {
-            $query['scope_type'] = $this->scope->getScopeType()->value;
+            $query['scope_type'] = $this->scope->getScopeTypeValue();
             $query['scope_id'] = (string) $this->scope->getScopeId();
         }
 

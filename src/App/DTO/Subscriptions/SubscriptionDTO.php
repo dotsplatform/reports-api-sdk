@@ -28,13 +28,13 @@ class SubscriptionDTO extends DTO
 
     protected ScopeDTO $scope;
 
-    protected Grain $grain;
+    protected string $grainValue;
 
     protected SubscriptionScheduleDTO $schedule;
 
-    protected SubscriptionChannel $channel;
+    protected string $channelValue;
 
-    protected SubscriptionFormat $format;
+    protected string $formatValue;
 
     protected ?string $locale = null;
 
@@ -62,10 +62,10 @@ class SubscriptionDTO extends DTO
             'id' => ResponseField::string($data, 'id'),
             'definitionId' => ResponseField::string($data, 'definition_id'),
             'scope' => ScopeDTO::fromResponse(ResponseField::array($data, 'scope')),
-            'grain' => ResponseField::enum($data, 'grain', Grain::class),
+            'grainValue' => ResponseField::string($data, 'grain'),
             'schedule' => SubscriptionScheduleDTO::fromResponse(ResponseField::array($data, 'schedule')),
-            'channel' => ResponseField::enum($data, 'channel', SubscriptionChannel::class),
-            'format' => ResponseField::enum($data, 'format', SubscriptionFormat::class),
+            'channelValue' => ResponseField::string($data, 'channel'),
+            'formatValue' => ResponseField::string($data, 'format'),
             'locale' => ResponseField::nullableString($data, 'locale'),
             'isActive' => ResponseField::bool($data, 'is_active'),
             'pausedReason' => ResponseField::nullableString($data, 'paused_reason'),
@@ -92,9 +92,20 @@ class SubscriptionDTO extends DTO
         return $this->scope;
     }
 
-    public function getGrain(): Grain
+    /**
+     * The raw value, also when this SDK version does not know it.
+     */
+    public function getGrainValue(): string
     {
-        return $this->grain;
+        return $this->grainValue;
+    }
+
+    /**
+     * Null when the service sends a value this SDK version does not know (see getGrainValue()).
+     */
+    public function getGrain(): ?Grain
+    {
+        return Grain::tryFrom($this->grainValue);
     }
 
     public function getSchedule(): SubscriptionScheduleDTO
@@ -102,14 +113,36 @@ class SubscriptionDTO extends DTO
         return $this->schedule;
     }
 
-    public function getChannel(): SubscriptionChannel
+    /**
+     * The raw value, also when this SDK version does not know it.
+     */
+    public function getChannelValue(): string
     {
-        return $this->channel;
+        return $this->channelValue;
     }
 
-    public function getFormat(): SubscriptionFormat
+    /**
+     * Null when the service sends a value this SDK version does not know (see getChannelValue()).
+     */
+    public function getChannel(): ?SubscriptionChannel
     {
-        return $this->format;
+        return SubscriptionChannel::tryFrom($this->channelValue);
+    }
+
+    /**
+     * The raw value, also when this SDK version does not know it.
+     */
+    public function getFormatValue(): string
+    {
+        return $this->formatValue;
+    }
+
+    /**
+     * Null when the service sends a value this SDK version does not know (see getFormatValue()).
+     */
+    public function getFormat(): ?SubscriptionFormat
+    {
+        return SubscriptionFormat::tryFrom($this->formatValue);
     }
 
     /**

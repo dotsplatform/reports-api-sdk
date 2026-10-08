@@ -95,7 +95,7 @@ class MetricsHttpClient implements MetricsClient
         $path = $this->transport->buildPath(self::SHOW_SNAPSHOT_URL_TEMPLATE, $accountId, $grain->value, $periodKey);
         $query = [];
         if ($scope !== null) {
-            $query['scope_type'] = $scope->getScopeType()->value;
+            $query['scope_type'] = $scope->getScopeTypeValue();
             $query['scope_id'] = $scope->getScopeId();
         }
 

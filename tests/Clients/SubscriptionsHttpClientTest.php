@@ -22,6 +22,7 @@ use Dotsplatform\ReportsApi\Enums\Grain;
 use Dotsplatform\ReportsApi\Enums\RecipientStatus;
 use Dotsplatform\ReportsApi\Enums\ReportLocale;
 use Dotsplatform\ReportsApi\Enums\ScopeType;
+use Dotsplatform\ReportsApi\Enums\SubscriptionChannel;
 use Dotsplatform\ReportsApi\Enums\SubscriptionFormat;
 use Dotsplatform\ReportsApi\Http\RequestHeader;
 use Dotsplatform\ReportsApi\Tests\HttpClientTestCase;
@@ -74,7 +75,8 @@ class SubscriptionsHttpClientTest extends HttpClientTestCase
         $this->assertSame('09:00', $subscription->getSchedule()->getSendTime());
         $this->assertSame(1, $subscription->getSchedule()->getSendWeekday());
         $this->assertNull($subscription->getSchedule()->getSendMonthDay());
-        $this->assertSame('email', $subscription->getChannel()->value);
+        $this->assertSame(SubscriptionChannel::EMAIL, $subscription->getChannel());
+        $this->assertSame('email', $subscription->getChannelValue());
         $this->assertSame(SubscriptionFormat::DIGEST, $subscription->getFormat());
         $this->assertNull($subscription->getLocale());
         $this->assertTrue($subscription->isActive());
@@ -162,7 +164,7 @@ class SubscriptionsHttpClientTest extends HttpClientTestCase
         $this->assertSame('owner@example.test', $delivered->getRecipientEmail());
         $this->assertSame(self::SUBSCRIPTION.':2026-W41', $delivered->getSendKey());
         $this->assertSame(StubResponses::RUN_ID, $delivered->getRunId());
-        $this->assertSame('email', $delivered->getChannel()->value);
+        $this->assertSame(SubscriptionChannel::EMAIL, $delivered->getChannel());
         $this->assertSame(DeliveryStatus::DELIVERED, $delivered->getStatus());
         $this->assertNull($delivered->getError());
         $this->assertSame(StubResponses::CREATED_AT, $delivered->getSentAt());

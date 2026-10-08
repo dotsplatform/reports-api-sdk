@@ -31,13 +31,13 @@ class ReportDefinitionDTO extends DTO
 
     protected ?string $templateKey = null;
 
-    protected ReportPurpose $purpose;
+    protected string $purposeValue;
 
     protected ScopeDTO $scope;
 
-    protected Grain $defaultGrain;
+    protected string $defaultGrainValue;
 
-    protected CompareMode $comparison;
+    protected string $comparisonValue;
 
     protected int $trendPeriods;
 
@@ -60,10 +60,10 @@ class ReportDefinitionDTO extends DTO
             'name' => ResponseField::string($data, 'name'),
             'isTemplate' => ResponseField::bool($data, 'is_template'),
             'templateKey' => ResponseField::nullableString($data, 'template_key'),
-            'purpose' => ResponseField::enum($data, 'purpose', ReportPurpose::class),
+            'purposeValue' => ResponseField::string($data, 'purpose'),
             'scope' => ScopeDTO::fromResponse(ResponseField::array($data, 'scope')),
-            'defaultGrain' => ResponseField::enum($data, 'default_grain', Grain::class),
-            'comparison' => ResponseField::enum($data, 'comparison', CompareMode::class),
+            'defaultGrainValue' => ResponseField::string($data, 'default_grain'),
+            'comparisonValue' => ResponseField::string($data, 'comparison'),
             'trendPeriods' => ResponseField::int($data, 'trend_periods'),
             'shareLinkDays' => ResponseField::int($data, 'share_link_days'),
             'isDefault' => ResponseField::bool($data, 'is_default'),
@@ -106,9 +106,20 @@ class ReportDefinitionDTO extends DTO
         return $this->templateKey;
     }
 
-    public function getPurpose(): ReportPurpose
+    /**
+     * The raw value, also when this SDK version does not know it.
+     */
+    public function getPurposeValue(): string
     {
-        return $this->purpose;
+        return $this->purposeValue;
+    }
+
+    /**
+     * Null when the service sends a value this SDK version does not know (see getPurposeValue()).
+     */
+    public function getPurpose(): ?ReportPurpose
+    {
+        return ReportPurpose::tryFrom($this->purposeValue);
     }
 
     public function getScope(): ScopeDTO
@@ -116,14 +127,36 @@ class ReportDefinitionDTO extends DTO
         return $this->scope;
     }
 
-    public function getDefaultGrain(): Grain
+    /**
+     * The raw value, also when this SDK version does not know it.
+     */
+    public function getDefaultGrainValue(): string
     {
-        return $this->defaultGrain;
+        return $this->defaultGrainValue;
     }
 
-    public function getComparison(): CompareMode
+    /**
+     * Null when the service sends a value this SDK version does not know (see getDefaultGrainValue()).
+     */
+    public function getDefaultGrain(): ?Grain
     {
-        return $this->comparison;
+        return Grain::tryFrom($this->defaultGrainValue);
+    }
+
+    /**
+     * The raw value, also when this SDK version does not know it.
+     */
+    public function getComparisonValue(): string
+    {
+        return $this->comparisonValue;
+    }
+
+    /**
+     * Null when the service sends a value this SDK version does not know (see getComparisonValue()).
+     */
+    public function getComparison(): ?CompareMode
+    {
+        return CompareMode::tryFrom($this->comparisonValue);
     }
 
     public function getTrendPeriods(): int

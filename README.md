@@ -76,6 +76,20 @@ A period is chosen in exactly one way: `period` (one `PeriodRequestDTO`), `perio
 - Periods are a `PeriodDTO` (`grain`, `key`, and `from` / `to` / `label` where the response has them).
 - Durations are seconds; times are unix timestamps.
 
+### Compatibility: enums in responses are tolerant
+
+The service may add enum values (a new subscription format, delivery status, scope type, …) before every consumer
+has upgraded the SDK. An unknown value must never break a whole response, so:
+
+- every enum-backed field of a **response** DTO keeps the raw string: `getStatusValue(): string`;
+- its typed getter returns the enum or **null** for a value this SDK version does not know: `getStatus(): ?DeliveryStatus`;
+- code that branches on a value handles null (treat it as "unknown", show the raw value, or skip);
+- helpers such as `ReportRunDTO::isPdfReady()` answer false for unknown values.
+
+**Request** DTOs stay strict: they take enum cases, so the SDK never sends a value the service rejects. A field that
+is not an enum but has an unexpected type (a string where an integer is documented) still throws
+`ReportsUnexpectedResponseException`.
+
 ### Report definitions
 
 ```php
