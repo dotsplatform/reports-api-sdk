@@ -20,12 +20,14 @@ use Dotsplatform\ReportsApi\Clients\Stubs\Success\SuccessOperationsStubClient;
 use Dotsplatform\ReportsApi\Clients\Stubs\Success\SuccessReportDefinitionsStubClient;
 use Dotsplatform\ReportsApi\Clients\Stubs\Success\SuccessReportRunsStubClient;
 use Dotsplatform\ReportsApi\Clients\Stubs\Success\SuccessSettingsStubClient;
+use Dotsplatform\ReportsApi\Clients\Stubs\Success\SuccessSubscriptionsStubClient;
 use Dotsplatform\ReportsApi\Contracts\ApiClientsClient;
 use Dotsplatform\ReportsApi\Contracts\MetricsClient;
 use Dotsplatform\ReportsApi\Contracts\OperationsClient;
 use Dotsplatform\ReportsApi\Contracts\ReportDefinitionsClient;
 use Dotsplatform\ReportsApi\Contracts\ReportRunsClient;
 use Dotsplatform\ReportsApi\Contracts\SettingsClient;
+use Dotsplatform\ReportsApi\Contracts\SubscriptionsClient;
 use Dotsplatform\ReportsApi\ReportsClient;
 
 class SuccessReportsStubClient implements ReportsClient
@@ -48,6 +50,11 @@ class SuccessReportsStubClient implements ReportsClient
     public function settings(): SettingsClient
     {
         return new SuccessSettingsStubClient();
+    }
+
+    public function subscriptions(): SubscriptionsClient
+    {
+        return new SuccessSubscriptionsStubClient();
     }
 
     public function apiClients(): ApiClientsClient

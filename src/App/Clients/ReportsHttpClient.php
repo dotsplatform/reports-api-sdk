@@ -19,12 +19,14 @@ use Dotsplatform\ReportsApi\Clients\Http\OperationsHttpClient;
 use Dotsplatform\ReportsApi\Clients\Http\ReportDefinitionsHttpClient;
 use Dotsplatform\ReportsApi\Clients\Http\ReportRunsHttpClient;
 use Dotsplatform\ReportsApi\Clients\Http\SettingsHttpClient;
+use Dotsplatform\ReportsApi\Clients\Http\SubscriptionsHttpClient;
 use Dotsplatform\ReportsApi\Contracts\ApiClientsClient;
 use Dotsplatform\ReportsApi\Contracts\MetricsClient;
 use Dotsplatform\ReportsApi\Contracts\OperationsClient;
 use Dotsplatform\ReportsApi\Contracts\ReportDefinitionsClient;
 use Dotsplatform\ReportsApi\Contracts\ReportRunsClient;
 use Dotsplatform\ReportsApi\Contracts\SettingsClient;
+use Dotsplatform\ReportsApi\Contracts\SubscriptionsClient;
 use Dotsplatform\ReportsApi\Http\ReportsHttpTransport;
 use Dotsplatform\ReportsApi\ReportsClient;
 
@@ -38,6 +40,8 @@ class ReportsHttpClient implements ReportsClient
 
     private readonly SettingsClient $settingsClient;
 
+    private readonly SubscriptionsClient $subscriptionsClient;
+
     private readonly ApiClientsClient $apiClientsClient;
 
     private readonly OperationsClient $operationsClient;
@@ -48,6 +52,7 @@ class ReportsHttpClient implements ReportsClient
         $this->reportDefinitionsClient = new ReportDefinitionsHttpClient($transport);
         $this->reportRunsClient = new ReportRunsHttpClient($transport);
         $this->settingsClient = new SettingsHttpClient($transport);
+        $this->subscriptionsClient = new SubscriptionsHttpClient($transport);
         $this->apiClientsClient = new ApiClientsHttpClient($transport);
         $this->operationsClient = new OperationsHttpClient($transport);
     }
@@ -70,6 +75,11 @@ class ReportsHttpClient implements ReportsClient
     public function settings(): SettingsClient
     {
         return $this->settingsClient;
+    }
+
+    public function subscriptions(): SubscriptionsClient
+    {
+        return $this->subscriptionsClient;
     }
 
     public function apiClients(): ApiClientsClient

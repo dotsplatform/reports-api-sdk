@@ -24,6 +24,7 @@ use Dotsplatform\ReportsApi\Contracts\OperationsClient;
 use Dotsplatform\ReportsApi\Contracts\ReportDefinitionsClient;
 use Dotsplatform\ReportsApi\Contracts\ReportRunsClient;
 use Dotsplatform\ReportsApi\Contracts\SettingsClient;
+use Dotsplatform\ReportsApi\Contracts\SubscriptionsClient;
 
 interface ReportsClient
 {
@@ -46,6 +47,11 @@ interface ReportsClient
      * The account report settings.
      */
     public function settings(): SettingsClient;
+
+    /**
+     * Email subscriptions of reports, send-now and the delivery log.
+     */
+    public function subscriptions(): SubscriptionsClient;
 
     /**
      * Account API tokens (internal callers only).

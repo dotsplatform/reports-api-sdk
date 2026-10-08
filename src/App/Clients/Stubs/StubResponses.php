@@ -26,6 +26,12 @@ final class StubResponses
 
     public const string API_CLIENT_ID = '0199a000-0000-7000-8000-0000000f0001';
 
+    public const string SUBSCRIPTION_ID = '0199a000-0000-7000-8000-000000050001';
+
+    public const string RECIPIENT_ID = '0199a000-0000-7000-8000-000000060001';
+
+    public const string DELIVERY_ID = '0199a000-0000-7000-8000-000000070001';
+
     public const string CURRENCY = 'UAH';
 
     public const int CREATED_AT = 1791460800;
@@ -266,6 +272,52 @@ final class StubResponses
         return [
             'data' => self::apiClient($name),
             'token' => '1|dotsr_stubplaintoken',
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function subscription(string $subscriptionId = self::SUBSCRIPTION_ID): array
+    {
+        return [
+            'id' => $subscriptionId,
+            'definition_id' => self::DEFINITION_ID,
+            'scope' => ['type' => 'account', 'id' => self::ACCOUNT_ID],
+            'grain' => 'iso_week',
+            'schedule' => ['send_time' => '09:00', 'send_weekday' => 1, 'send_month_day' => null],
+            'channel' => 'email',
+            'format' => 'digest',
+            'locale' => null,
+            'is_active' => true,
+            'paused_reason' => null,
+            'next_due_at' => self::CREATED_AT + 86400,
+            'last_sent_at' => null,
+            'last_period_key' => null,
+            'created_by' => 'livesite-user-7',
+            'recipients' => [
+                ['id' => self::RECIPIENT_ID, 'email' => 'owner@example.test', 'name' => 'Owner', 'status' => 'active', 'unsubscribed_at' => null],
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function delivery(): array
+    {
+        return [
+            'id' => self::DELIVERY_ID,
+            'recipient_id' => self::RECIPIENT_ID,
+            'recipient_email' => 'owner@example.test',
+            'send_key' => self::SUBSCRIPTION_ID.':2026-W41',
+            'run_id' => self::RUN_ID,
+            'channel' => 'email',
+            'status' => 'delivered',
+            'error' => null,
+            'sent_at' => self::CREATED_AT,
+            'delivered_at' => self::CREATED_AT + 5,
+            'created_at' => self::CREATED_AT,
         ];
     }
 

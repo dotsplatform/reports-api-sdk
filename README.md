@@ -39,6 +39,7 @@ The client is split into groups:
 | `reportDefinitions()` | `list`, `create`, `get`, `update`, `delete`, `duplicate`, `resetToTemplate`, `getData`, `listBlocks` |
 | `reportRuns()` | `list`, `create`, `get`, `downloadPdf` (bytes), `createShareLink` |
 | `settings()` | `get`, `update` |
+| `subscriptions()` | `list`, `create`, `get`, `update`, `delete`, `sendNow`, `listDeliveries` (latest 100, newest first) |
 | `apiClients()` | `list`, `create` (the plain token is returned once), `revoke` |
 | `operations()` | `listTemplates`, `queueBackfill`, `queueReaggregation` |
 
