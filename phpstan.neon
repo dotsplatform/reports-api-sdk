@@ -1,0 +1,27 @@
+includes:
+    - vendor/phpstan/phpstan-strict-rules/rules.neon
+    - vendor/phpstan/phpstan-phpunit/extension.neon
+    - vendor/phpstan/phpstan-phpunit/rules.neon
+
+parameters:
+    # The highest level. Never lower it, never add a baseline file.
+    level: max
+
+    # The package supports PHP 8.3: newer syntax must not slip in.
+    phpVersion: 80300
+
+    paths:
+        - src
+        - tests
+
+    treatPhpDocTypesAsCertain: false
+    reportUnmatchedIgnoredErrors: true
+
+    # checkUninitializedProperties stays off: Dots DTOs (Dots\Data\BaseObject) declare protected properties
+    # without defaults and hydrate them by reflection in fromArray().
+    checkImplicitMixed: true
+    checkBenevolentUnionTypes: true
+    reportPossiblyNonexistentGeneralArrayOffset: true
+    reportPossiblyNonexistentConstantArrayOffset: true
+    checkMissingCallableSignature: true
+    checkTooWideReturnTypesInProtectedAndPublicMethods: true
