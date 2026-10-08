@@ -28,6 +28,7 @@ use Dotsplatform\ReportsApi\DTO\Reports\Requests\ReportDefinitionFormDTO;
 use Dotsplatform\ReportsApi\DTO\Runs\Requests\CreateReportRunRequestDTO;
 use Dotsplatform\ReportsApi\DTO\Runs\Requests\ReportPeriodRequestDTO;
 use Dotsplatform\ReportsApi\DTO\Settings\Requests\UpdateReportSettingsDTO;
+use Dotsplatform\ReportsApi\DTO\Subscriptions\Requests\SubscriptionFormDTO;
 use Dotsplatform\ReportsApi\Enums\Grain;
 use Dotsplatform\ReportsApi\Enums\ScopeType;
 use Dotsplatform\ReportsApi\Exceptions\ReportsServerException;
@@ -70,7 +71,7 @@ class StubClientsTest extends TestCase
         $reportDefinitions->delete(self::ACCOUNT, self::DEFINITION);
     }
 
-    public function testTheSuccessStubAnswersRunsSettingsApiClientsAndOperations(): void
+    public function testTheSuccessStubAnswersRunsSettingsSubscriptionsApiClientsAndOperations(): void
     {
         $reportsClient = new SuccessReportsStubClient();
         $period = ReportPeriodRequestDTO::fromArray(['grain' => Grain::MONTH, 'periodKey' => '2026-09']);
@@ -87,6 +88,16 @@ class StubClientsTest extends TestCase
         $this->assertSame('Script', $reportsClient->apiClients()->create(self::ACCOUNT, CreateApiClientRequestDTO::create('Script'))->getApiClient()->getName());
         $this->assertCount(1, $reportsClient->apiClients()->list(self::ACCOUNT));
         $reportsClient->apiClients()->revoke(self::ACCOUNT, StubResponses::API_CLIENT_ID);
+
+        $subscriptions = $reportsClient->subscriptions();
+        $subscriptionId = StubResponses::SUBSCRIPTION_ID;
+        $this->assertCount(1, $subscriptions->list(self::ACCOUNT));
+        $this->assertSame($subscriptionId, $subscriptions->create(self::ACCOUNT, SubscriptionFormDTO::empty())->getId());
+        $this->assertSame($subscriptionId, $subscriptions->get(self::ACCOUNT, $subscriptionId)->getId());
+        $this->assertSame($subscriptionId, $subscriptions->update(self::ACCOUNT, $subscriptionId, SubscriptionFormDTO::empty())->getId());
+        $this->assertSame('queued', $subscriptions->sendNow(self::ACCOUNT, $subscriptionId));
+        $this->assertCount(1, $subscriptions->listDeliveries(self::ACCOUNT, $subscriptionId));
+        $subscriptions->delete(self::ACCOUNT, $subscriptionId);
 
         $this->assertCount(1, $reportsClient->operations()->listTemplates());
         $this->assertSame(1, $reportsClient->operations()->queueBackfill(self::ACCOUNT, BackfillRequestDTO::empty()));
@@ -129,6 +140,18 @@ class StubClientsTest extends TestCase
         yield 'reportRuns.createShareLink' => [fn (ReportsClient $client): mixed => $client->reportRuns()->createShareLink($account, $definition, $period)];
         yield 'settings.get' => [fn (ReportsClient $client): mixed => $client->settings()->get($account)];
         yield 'settings.update' => [fn (ReportsClient $client): mixed => $client->settings()->update($account, UpdateReportSettingsDTO::empty())];
+        $subscription = StubResponses::SUBSCRIPTION_ID;
+        yield 'subscriptions.list' => [fn (ReportsClient $client): mixed => $client->subscriptions()->list($account)];
+        yield 'subscriptions.create' => [fn (ReportsClient $client): mixed => $client->subscriptions()->create($account, SubscriptionFormDTO::empty())];
+        yield 'subscriptions.get' => [fn (ReportsClient $client): mixed => $client->subscriptions()->get($account, $subscription)];
+        yield 'subscriptions.update' => [fn (ReportsClient $client): mixed => $client->subscriptions()->update($account, $subscription, SubscriptionFormDTO::empty())];
+        yield 'subscriptions.delete' => [function (ReportsClient $client) use ($account, $subscription): mixed {
+            $client->subscriptions()->delete($account, $subscription);
+
+            return null;
+        }];
+        yield 'subscriptions.sendNow' => [fn (ReportsClient $client): mixed => $client->subscriptions()->sendNow($account, $subscription)];
+        yield 'subscriptions.listDeliveries' => [fn (ReportsClient $client): mixed => $client->subscriptions()->listDeliveries($account, $subscription)];
         yield 'apiClients.list' => [fn (ReportsClient $client): mixed => $client->apiClients()->list($account)];
         yield 'apiClients.create' => [fn (ReportsClient $client): mixed => $client->apiClients()->create($account, CreateApiClientRequestDTO::create('Script'))];
         yield 'apiClients.revoke' => [function (ReportsClient $client) use ($account): mixed {
