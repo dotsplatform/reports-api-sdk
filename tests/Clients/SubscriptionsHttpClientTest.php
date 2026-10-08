@@ -23,6 +23,7 @@ use Dotsplatform\ReportsApi\Enums\RecipientStatus;
 use Dotsplatform\ReportsApi\Enums\ReportLocale;
 use Dotsplatform\ReportsApi\Enums\ScopeType;
 use Dotsplatform\ReportsApi\Enums\SubscriptionChannel;
+use Dotsplatform\ReportsApi\Enums\SubscriptionClearableField;
 use Dotsplatform\ReportsApi\Enums\SubscriptionFormat;
 use Dotsplatform\ReportsApi\Http\RequestHeader;
 use Dotsplatform\ReportsApi\Tests\HttpClientTestCase;
@@ -114,6 +115,41 @@ class SubscriptionsHttpClientTest extends HttpClientTestCase
         $this->assertFalse($subscription->isActive());
         $this->assertSame('all_recipients_suppressed', $subscription->getPausedReason());
         $this->assertFalse($subscription->getRecipients()[0]->isActive());
+    }
+
+    public function testClearedFieldsAreSentAsJsonNull(): void
+    {
+        $this->queueJsonResponse(['data' => StubResponses::subscription()]);
+        $form = SubscriptionFormDTO::fromArray(['grain' => Grain::DAY])
+            ->clear(SubscriptionClearableField::LOCALE, SubscriptionClearableField::SEND_WEEKDAY)
+            ->clear(SubscriptionClearableField::SCOPE_ID, SubscriptionClearableField::SEND_MONTH_DAY, SubscriptionClearableField::LOCALE);
+
+        $this->makeClient()->subscriptions()->update(self::ACCOUNT, self::SUBSCRIPTION, $form);
+
+        $this->assertSame([
+            'grain' => 'day',
+            'locale' => null,
+            'send_weekday' => null,
+            'scope_id' => null,
+            'send_month_day' => null,
+        ], $this->getLastRequestJson());
+        $this->assertSame('{"grain":"day","locale":null,"send_weekday":null,"scope_id":null,"send_month_day":null}', $this->getLastRequestRawBody());
+    }
+
+    public function testFieldsNeverSetAreNotSentAndClearingDoesNotChangeTheOriginal(): void
+    {
+        $this->queueJsonResponse(['data' => StubResponses::subscription()]);
+        $form = SubscriptionFormDTO::fromArray(['locale' => ReportLocale::UA, 'sendWeekday' => 3]);
+
+        $clearedForm = $form->clear(SubscriptionClearableField::LOCALE);
+
+        $this->assertSame(['send_weekday' => 3, 'locale' => 'ua'], $form->toRequestBody());
+        $this->assertSame([], $form->getClearedFields());
+        $this->assertSame([SubscriptionClearableField::LOCALE], $clearedForm->getClearedFields());
+
+        // A cleared field wins over a value set on the same form.
+        $this->makeClient()->subscriptions()->update(self::ACCOUNT, self::SUBSCRIPTION, $clearedForm);
+        $this->assertSame(['send_weekday' => 3, 'locale' => null], $this->getLastRequestJson());
     }
 
     public function testListsShowsAndDeletes(): void

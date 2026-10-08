@@ -108,6 +108,23 @@ $reportsClient->reportDefinitions()->update($accountId, $definition->getId(), Re
 
 Unset form fields are not sent, so `update` changes only what is set.
 
+### Clearing a field in an update
+
+A `null` field in a form means "not given", so it is not sent. To **remove** a value, clear it explicitly. The
+cleared fields are sent as JSON `null`:
+
+```php
+use Dotsplatform\ReportsApi\Enums\SubscriptionClearableField;
+
+$form = SubscriptionFormDTO::fromArray(['sendTime' => '08:00'])
+    ->clear(SubscriptionClearableField::LOCALE, SubscriptionClearableField::SEND_WEEKDAY);
+// PATCH body: {"send_time": "08:00", "locale": null, "send_weekday": null}
+```
+
+- Subscriptions can clear `LOCALE`, `SCOPE_ID`, `SEND_WEEKDAY` and `SEND_MONTH_DAY`.
+- Report definitions can clear `SCOPE_ID` (`ReportDefinitionClearableField`).
+- `clear()` returns a copy. A cleared field is sent as null even when a value was set on the same form.
+
 ## Errors
 
 Every call may throw a subclass of `Dotsplatform\ReportsApi\Exceptions\ReportsApiException`:

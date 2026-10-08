@@ -8,6 +8,9 @@ declare(strict_types=1);
  * The body of POST and PATCH subscriptions. A null field is not sent. On create, definitionId and recipients are
  * required; on update, recipients (when set) replace the whole list. At most 20 recipients.
  *
+ * To remove a value (locale, scope id, weekday, month day) in an update, call clear(): a field left null is not sent,
+ * a cleared field is sent as null.
+ *
  * @copyright Copyright (c) DOTSPLATFORM, LLC
  * @author    Bogdan Mamontov <bohdan.mamontov@dotsplatform.com>
  */
@@ -18,6 +21,7 @@ use Dots\Data\DTO;
 use Dotsplatform\ReportsApi\Enums\Grain;
 use Dotsplatform\ReportsApi\Enums\ReportLocale;
 use Dotsplatform\ReportsApi\Enums\ScopeType;
+use Dotsplatform\ReportsApi\Enums\SubscriptionClearableField;
 use Dotsplatform\ReportsApi\Enums\SubscriptionFormat;
 
 class SubscriptionFormDTO extends DTO
@@ -56,6 +60,39 @@ class SubscriptionFormDTO extends DTO
 
     /** @var list<RecipientRequestDTO>|null */
     protected ?array $recipients = null;
+
+    /**
+     * Fields sent as JSON null; set them only through clear().
+     *
+     * @var list<SubscriptionClearableField>
+     */
+    protected array $clearedFields = [];
+
+    /**
+     * A copy that also sends these fields as JSON null, so the service removes their values. A cleared field is
+     * sent as null even when a value was set. Fields that are neither set nor cleared are not sent.
+     */
+    public function clear(SubscriptionClearableField ...$fields): static
+    {
+        $clearedFields = $this->clearedFields;
+        foreach ($fields as $field) {
+            if (in_array($field, $clearedFields, true)) {
+                continue;
+            }
+
+            $clearedFields[] = $field;
+        }
+
+        return $this->copy(['clearedFields' => $clearedFields]);
+    }
+
+    /**
+     * @return list<SubscriptionClearableField>
+     */
+    public function getClearedFields(): array
+    {
+        return $this->clearedFields;
+    }
 
     public function getDefinitionId(): ?string
     {
@@ -137,6 +174,10 @@ class SubscriptionFormDTO extends DTO
 
         if ($this->recipients !== null) {
             $body['recipients'] = $this->buildRecipientsBody($this->recipients);
+        }
+
+        foreach ($this->clearedFields as $clearedField) {
+            $body[$clearedField->value] = null;
         }
 
         return $body;

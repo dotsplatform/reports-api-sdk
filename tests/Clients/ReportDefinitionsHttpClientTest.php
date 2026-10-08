@@ -21,6 +21,7 @@ use Dotsplatform\ReportsApi\DTO\Reports\Requests\ReportDataRequestDTO;
 use Dotsplatform\ReportsApi\DTO\Reports\Requests\ReportDefinitionFormDTO;
 use Dotsplatform\ReportsApi\Enums\CompareMode;
 use Dotsplatform\ReportsApi\Enums\Grain;
+use Dotsplatform\ReportsApi\Enums\ReportDefinitionClearableField;
 use Dotsplatform\ReportsApi\Enums\ReportPurpose;
 use Dotsplatform\ReportsApi\Enums\ScopeType;
 use Dotsplatform\ReportsApi\Http\RequestHeader;
@@ -104,6 +105,19 @@ class ReportDefinitionsHttpClientTest extends HttpClientTestCase
         ], $this->getLastRequestJson());
         // An empty block config must be a JSON object for the service.
         $this->assertStringContainsString('{"type":"header","config":{}}', $this->getLastRequestRawBody());
+    }
+
+    public function testAClearedScopeIdIsSentAsJsonNull(): void
+    {
+        $this->queueJsonResponse(['data' => StubResponses::reportDefinition()]);
+
+        $this->makeClient()->reportDefinitions()->update(
+            self::ACCOUNT,
+            self::DEFINITION,
+            ReportDefinitionFormDTO::fromArray(['scopeType' => ScopeType::ACCOUNT])->clear(ReportDefinitionClearableField::SCOPE_ID),
+        );
+
+        $this->assertSame('{"scope_type":"account","scope_id":null}', $this->getLastRequestRawBody());
     }
 
     public function testDeletesWithTheActor(): void
