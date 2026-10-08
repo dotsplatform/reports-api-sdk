@@ -108,6 +108,30 @@ $reportsClient->reportDefinitions()->update($accountId, $definition->getId(), Re
 
 Unset form fields are not sent, so `update` changes only what is set.
 
+### Subscription channels
+
+A subscription is delivered by email (the default) or Telegram. The channel is chosen on create and never changes:
+`update()` does not send it. Every recipient must match the channel.
+
+```php
+use Dotsplatform\ReportsApi\DTO\Subscriptions\Requests\RecipientRequestDTO;
+use Dotsplatform\ReportsApi\DTO\Subscriptions\Requests\SubscriptionFormDTO;
+use Dotsplatform\ReportsApi\Enums\SubscriptionChannel;
+
+$subscription = $reportsClient->subscriptions()->create($accountId, SubscriptionFormDTO::fromArray([
+    'definitionId' => $definitionId,
+    'channel' => SubscriptionChannel::TELEGRAM,
+    'recipients' => [
+        RecipientRequestDTO::telegramUser($livesiteUserId, 'Owner'), // a livesite user with Telegram connected
+        RecipientRequestDTO::telegramChat($telegramChatId),          // a chat connected to the notifier bot
+    ],
+]), $actorId);
+```
+
+Email recipients use `RecipientRequestDTO::email($email, $name)`. In responses, a recipient has `getKind()`
+(`RecipientKind`, tolerant like every response enum), a nullable `getEmail()`, `getTelegramChatId()` and
+`getTelegramUserId()`.
+
 ### Clearing a field in an update
 
 A `null` field in a form means "not given", so it is not sent. To **remove** a value, clear it explicitly. The

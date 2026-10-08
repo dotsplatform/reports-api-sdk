@@ -16,6 +16,7 @@ namespace Dotsplatform\ReportsApi\Tests\Http;
 
 use Dotsplatform\ReportsApi\Clients\Stubs\StubResponses;
 use Dotsplatform\ReportsApi\Enums\CompareMode;
+use Dotsplatform\ReportsApi\Enums\RecipientKind;
 use Dotsplatform\ReportsApi\Enums\ReportRunStatus;
 use Dotsplatform\ReportsApi\Tests\HttpClientTestCase;
 
@@ -25,11 +26,11 @@ class TolerantEnumsTest extends HttpClientTestCase
     {
         $subscriptionData = StubResponses::subscription();
         $subscriptionData['grain'] = 'quarter';
-        $subscriptionData['channel'] = 'telegram';
+        $subscriptionData['channel'] = 'whatsapp';
         $subscriptionData['format'] = 'digest_with_csv';
         $subscriptionData['scope'] = ['type' => 'courier_fleet', 'id' => StubResponses::CITY_ID];
         $subscriptionData['recipients'] = [
-            ['id' => StubResponses::RECIPIENT_ID, 'email' => 'owner@example.test', 'name' => null, 'status' => 'snoozed', 'unsubscribed_at' => null],
+            ['id' => StubResponses::RECIPIENT_ID, 'kind' => 'whatsapp', 'email' => null, 'name' => null, 'status' => 'snoozed', 'unsubscribed_at' => null],
         ];
         $this->queueJsonResponse(['data' => $subscriptionData]);
 
@@ -38,7 +39,7 @@ class TolerantEnumsTest extends HttpClientTestCase
         $this->assertNull($subscription->getGrain());
         $this->assertSame('quarter', $subscription->getGrainValue());
         $this->assertNull($subscription->getChannel());
-        $this->assertSame('telegram', $subscription->getChannelValue());
+        $this->assertSame('whatsapp', $subscription->getChannelValue());
         $this->assertNull($subscription->getFormat());
         $this->assertSame('digest_with_csv', $subscription->getFormatValue());
         $this->assertNull($subscription->getScope()->getScopeType());
@@ -47,13 +48,33 @@ class TolerantEnumsTest extends HttpClientTestCase
         $this->assertNull($recipient->getStatus());
         $this->assertSame('snoozed', $recipient->getStatusValue());
         $this->assertFalse($recipient->isActive());
+        $this->assertNull($recipient->getKind());
+        $this->assertSame('whatsapp', $recipient->getKindValue());
+        $this->assertFalse($recipient->isTelegram());
+        $this->assertNull($recipient->getEmail());
+    }
+
+    public function testARecipientWithoutKindFromAnOlderServiceIsAnEmailRecipient(): void
+    {
+        $subscriptionData = StubResponses::subscription();
+        $subscriptionData['recipients'] = [
+            ['id' => StubResponses::RECIPIENT_ID, 'email' => 'owner@example.test', 'name' => null, 'status' => 'active', 'unsubscribed_at' => null],
+        ];
+        $this->queueJsonResponse(['data' => $subscriptionData]);
+
+        $recipient = $this->makeClient()->subscriptions()->get(StubResponses::ACCOUNT_ID, StubResponses::SUBSCRIPTION_ID)->getRecipients()[0];
+
+        $this->assertSame(RecipientKind::EMAIL, $recipient->getKind());
+        $this->assertSame('owner@example.test', $recipient->getEmail());
+        $this->assertNull($recipient->getTelegramChatId());
+        $this->assertNull($recipient->getTelegramUserId());
     }
 
     public function testAnUnknownDeliveryStatusIsKeptRaw(): void
     {
         $deliveryData = StubResponses::delivery();
         $deliveryData['status'] = 'opened';
-        $deliveryData['channel'] = 'telegram';
+        $deliveryData['channel'] = 'whatsapp';
         $this->queueJsonResponse(['data' => [$deliveryData]]);
 
         $delivery = $this->makeClient()->subscriptions()->listDeliveries(StubResponses::ACCOUNT_ID, StubResponses::SUBSCRIPTION_ID)[0];
@@ -61,7 +82,7 @@ class TolerantEnumsTest extends HttpClientTestCase
         $this->assertNull($delivery->getStatus());
         $this->assertSame('opened', $delivery->getStatusValue());
         $this->assertNull($delivery->getChannel());
-        $this->assertSame('telegram', $delivery->getChannelValue());
+        $this->assertSame('whatsapp', $delivery->getChannelValue());
     }
 
     public function testAnUnknownRunStatusIsKeptRaw(): void

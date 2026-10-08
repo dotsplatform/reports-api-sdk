@@ -65,7 +65,7 @@ class SubscriptionsHttpClient implements SubscriptionsClient
     public function update(string $accountId, string $subscriptionId, SubscriptionFormDTO $form, ?string $actorId = null): SubscriptionDTO
     {
         $path = $this->transport->buildPath(self::SUBSCRIPTION_URL_TEMPLATE, $accountId, $subscriptionId);
-        $response = $this->transport->patchJson($path, $form->toRequestBody(), $actorId);
+        $response = $this->transport->patchJson($path, $form->toUpdateRequestBody(), $actorId);
 
         return SubscriptionDTO::fromResponse(ResponseField::array($response, 'data'));
     }

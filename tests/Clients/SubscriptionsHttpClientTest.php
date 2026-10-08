@@ -19,6 +19,7 @@ use Dotsplatform\ReportsApi\DTO\Subscriptions\Requests\RecipientRequestDTO;
 use Dotsplatform\ReportsApi\DTO\Subscriptions\Requests\SubscriptionFormDTO;
 use Dotsplatform\ReportsApi\Enums\DeliveryStatus;
 use Dotsplatform\ReportsApi\Enums\Grain;
+use Dotsplatform\ReportsApi\Enums\RecipientKind;
 use Dotsplatform\ReportsApi\Enums\RecipientStatus;
 use Dotsplatform\ReportsApi\Enums\ReportLocale;
 use Dotsplatform\ReportsApi\Enums\ScopeType;
@@ -88,11 +89,66 @@ class SubscriptionsHttpClientTest extends HttpClientTestCase
         $this->assertSame('livesite-user-7', $subscription->getCreatedBy());
         $recipient = $subscription->getRecipients()[0];
         $this->assertSame(StubResponses::RECIPIENT_ID, $recipient->getId());
+        $this->assertSame(RecipientKind::EMAIL, $recipient->getKind());
         $this->assertSame('owner@example.test', $recipient->getEmail());
+        $this->assertNull($recipient->getTelegramChatId());
+        $this->assertNull($recipient->getTelegramUserId());
         $this->assertSame('Owner', $recipient->getName());
         $this->assertSame(RecipientStatus::ACTIVE, $recipient->getStatus());
         $this->assertTrue($recipient->isActive());
         $this->assertNull($recipient->getUnsubscribedAt());
+    }
+
+    public function testCreatesATelegramSubscriptionWithUserAndChatRecipients(): void
+    {
+        $this->queueJsonResponse(['data' => StubResponses::telegramSubscription()], 201);
+
+        $subscription = $this->makeClient()->subscriptions()->create(self::ACCOUNT, SubscriptionFormDTO::fromArray([
+            'definitionId' => StubResponses::DEFINITION_ID,
+            'channel' => SubscriptionChannel::TELEGRAM,
+            'recipients' => [
+                RecipientRequestDTO::telegramUser(StubResponses::TELEGRAM_USER_ID, 'Owner'),
+                RecipientRequestDTO::telegramChat(StubResponses::TELEGRAM_CHAT_ID),
+            ],
+        ]));
+
+        $this->assertLastRequest('POST', self::SUBSCRIPTIONS_PATH);
+        $this->assertSame([
+            'definition_id' => StubResponses::DEFINITION_ID,
+            'recipients' => [
+                ['telegram_user_id' => StubResponses::TELEGRAM_USER_ID, 'name' => 'Owner'],
+                ['telegram_chat_id' => StubResponses::TELEGRAM_CHAT_ID, 'name' => null],
+            ],
+            'channel' => 'telegram',
+        ], $this->getLastRequestJson());
+
+        $this->assertSame(SubscriptionChannel::TELEGRAM, $subscription->getChannel());
+        $recipient = $subscription->getRecipients()[0];
+        $this->assertSame(StubResponses::TELEGRAM_RECIPIENT_ID, $recipient->getId());
+        $this->assertSame(RecipientKind::TELEGRAM, $recipient->getKind());
+        $this->assertSame('telegram', $recipient->getKindValue());
+        $this->assertTrue($recipient->isTelegram());
+        $this->assertNull($recipient->getEmail());
+        $this->assertSame(StubResponses::TELEGRAM_CHAT_ID, $recipient->getTelegramChatId());
+        $this->assertSame(StubResponses::TELEGRAM_USER_ID, $recipient->getTelegramUserId());
+    }
+
+    public function testUpdateNeverSendsTheChannel(): void
+    {
+        $this->queueJsonResponse(['data' => StubResponses::telegramSubscription()]);
+        $form = SubscriptionFormDTO::fromArray([
+            'channel' => SubscriptionChannel::TELEGRAM,
+            'recipients' => [RecipientRequestDTO::telegramUser(StubResponses::TELEGRAM_USER_ID)],
+        ]);
+
+        $this->makeClient()->subscriptions()->update(self::ACCOUNT, StubResponses::TELEGRAM_SUBSCRIPTION_ID, $form);
+
+        $this->assertLastRequest('PATCH', self::SUBSCRIPTIONS_PATH.'/'.StubResponses::TELEGRAM_SUBSCRIPTION_ID);
+        $this->assertSame([
+            'recipients' => [['telegram_user_id' => StubResponses::TELEGRAM_USER_ID, 'name' => null]],
+        ], $this->getLastRequestJson());
+        $this->assertArrayNotHasKey('channel', $form->toUpdateRequestBody());
+        $this->assertSame('telegram', $form->toRequestBody()['channel']);
     }
 
     public function testUpdateSendsOnlyTheSetFields(): void

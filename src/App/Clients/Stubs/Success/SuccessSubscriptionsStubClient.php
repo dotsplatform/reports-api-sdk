@@ -18,6 +18,7 @@ use Dotsplatform\ReportsApi\Contracts\SubscriptionsClient;
 use Dotsplatform\ReportsApi\DTO\Subscriptions\DeliveryDTO;
 use Dotsplatform\ReportsApi\DTO\Subscriptions\Requests\SubscriptionFormDTO;
 use Dotsplatform\ReportsApi\DTO\Subscriptions\SubscriptionDTO;
+use Dotsplatform\ReportsApi\Enums\SubscriptionChannel;
 
 class SuccessSubscriptionsStubClient implements SubscriptionsClient
 {
@@ -28,8 +29,15 @@ class SuccessSubscriptionsStubClient implements SubscriptionsClient
         return [SubscriptionDTO::fromResponse(StubResponses::subscription())];
     }
 
+    /**
+     * A telegram form gets the telegram sample, any other the email one.
+     */
     public function create(string $accountId, SubscriptionFormDTO $form, ?string $actorId = null): SubscriptionDTO
     {
+        if ($form->getChannel() === SubscriptionChannel::TELEGRAM) {
+            return SubscriptionDTO::fromResponse(StubResponses::telegramSubscription());
+        }
+
         return SubscriptionDTO::fromResponse(StubResponses::subscription());
     }
 

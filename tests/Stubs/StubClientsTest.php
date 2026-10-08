@@ -31,6 +31,7 @@ use Dotsplatform\ReportsApi\DTO\Settings\Requests\UpdateReportSettingsDTO;
 use Dotsplatform\ReportsApi\DTO\Subscriptions\Requests\SubscriptionFormDTO;
 use Dotsplatform\ReportsApi\Enums\Grain;
 use Dotsplatform\ReportsApi\Enums\ScopeType;
+use Dotsplatform\ReportsApi\Enums\SubscriptionChannel;
 use Dotsplatform\ReportsApi\Exceptions\ReportsServerException;
 use Dotsplatform\ReportsApi\ReportsClient;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -93,6 +94,8 @@ class StubClientsTest extends TestCase
         $subscriptionId = StubResponses::SUBSCRIPTION_ID;
         $this->assertCount(1, $subscriptions->list(self::ACCOUNT));
         $this->assertSame($subscriptionId, $subscriptions->create(self::ACCOUNT, SubscriptionFormDTO::empty())->getId());
+        $telegramForm = SubscriptionFormDTO::fromArray(['channel' => SubscriptionChannel::TELEGRAM]);
+        $this->assertSame(SubscriptionChannel::TELEGRAM, $subscriptions->create(self::ACCOUNT, $telegramForm)->getChannel());
         $this->assertSame($subscriptionId, $subscriptions->get(self::ACCOUNT, $subscriptionId)->getId());
         $this->assertSame($subscriptionId, $subscriptions->update(self::ACCOUNT, $subscriptionId, SubscriptionFormDTO::empty())->getId());
         $this->assertSame('queued', $subscriptions->sendNow(self::ACCOUNT, $subscriptionId));

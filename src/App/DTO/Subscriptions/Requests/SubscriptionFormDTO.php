@@ -8,6 +8,9 @@ declare(strict_types=1);
  * The body of POST and PATCH subscriptions. A null field is not sent. On create, definitionId and recipients are
  * required; on update, recipients (when set) replace the whole list. At most 20 recipients.
  *
+ * The channel (email by default) is chosen on create only: toRequestBody() sends it, toUpdateRequestBody() never does,
+ * because the service rejects a channel in PATCH. The recipients must match the channel (see RecipientRequestDTO).
+ *
  * To remove a value (locale, scope id, weekday, month day) in an update, call clear(): a field left null is not sent,
  * a cleared field is sent as null.
  *
@@ -21,6 +24,7 @@ use Dots\Data\DTO;
 use Dotsplatform\ReportsApi\Enums\Grain;
 use Dotsplatform\ReportsApi\Enums\ReportLocale;
 use Dotsplatform\ReportsApi\Enums\ScopeType;
+use Dotsplatform\ReportsApi\Enums\SubscriptionChannel;
 use Dotsplatform\ReportsApi\Enums\SubscriptionClearableField;
 use Dotsplatform\ReportsApi\Enums\SubscriptionFormat;
 
@@ -57,6 +61,11 @@ class SubscriptionFormDTO extends DTO
     protected ?ReportLocale $locale = null;
 
     protected ?bool $isActive = null;
+
+    /**
+     * Create only; null sends nothing and the service uses email.
+     */
+    protected ?SubscriptionChannel $channel = null;
 
     /** @var list<RecipientRequestDTO>|null */
     protected ?array $recipients = null;
@@ -144,6 +153,11 @@ class SubscriptionFormDTO extends DTO
         return $this->isActive;
     }
 
+    public function getChannel(): ?SubscriptionChannel
+    {
+        return $this->channel;
+    }
+
     /**
      * @return list<RecipientRequestDTO>|null
      */
@@ -153,9 +167,27 @@ class SubscriptionFormDTO extends DTO
     }
 
     /**
+     * The POST (create) body, with the channel when set.
+     *
      * @return array<string, mixed>
      */
     public function toRequestBody(): array
+    {
+        $body = $this->toUpdateRequestBody();
+
+        if ($this->channel !== null) {
+            $body['channel'] = $this->channel->value;
+        }
+
+        return $body;
+    }
+
+    /**
+     * The PATCH (update) body: never the channel, which cannot change after create.
+     *
+     * @return array<string, mixed>
+     */
+    public function toUpdateRequestBody(): array
     {
         $body = [
             'definition_id' => $this->definitionId,
@@ -185,7 +217,7 @@ class SubscriptionFormDTO extends DTO
 
     /**
      * @param  list<RecipientRequestDTO>  $recipients
-     * @return list<array{email: string, name: string|null}>
+     * @return list<array<string, string|int|null>>
      */
     private function buildRecipientsBody(array $recipients): array
     {

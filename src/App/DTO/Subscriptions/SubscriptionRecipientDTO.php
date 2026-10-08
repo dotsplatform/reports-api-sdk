@@ -5,7 +5,8 @@ declare(strict_types=1);
 /**
  * Description of SubscriptionRecipientDTO.php
  *
- * One recipient of a subscription and whether mail still goes to it.
+ * One recipient of a subscription and whether reports still go to it. An email recipient has the email; a Telegram
+ * recipient has the chat id and/or the livesite user id it was added by.
  *
  * @copyright Copyright (c) DOTSPLATFORM, LLC
  * @author    Bogdan Mamontov <bohdan.mamontov@dotsplatform.com>
@@ -14,14 +15,26 @@ declare(strict_types=1);
 namespace Dotsplatform\ReportsApi\DTO\Subscriptions;
 
 use Dots\Data\DTO;
+use Dotsplatform\ReportsApi\Enums\RecipientKind;
 use Dotsplatform\ReportsApi\Enums\RecipientStatus;
 use Dotsplatform\ReportsApi\Support\ResponseField;
 
 class SubscriptionRecipientDTO extends DTO
 {
+    /**
+     * The value used when the service is older than the recipient "kind" field: every recipient was an email then.
+     */
+    private const string LEGACY_KIND_VALUE = 'email';
+
     protected string $id;
 
-    protected string $email;
+    protected string $kindValue;
+
+    protected ?string $email = null;
+
+    protected ?int $telegramChatId = null;
+
+    protected ?string $telegramUserId = null;
 
     protected ?string $name = null;
 
@@ -36,7 +49,10 @@ class SubscriptionRecipientDTO extends DTO
     {
         return static::fromArray([
             'id' => ResponseField::string($data, 'id'),
-            'email' => ResponseField::string($data, 'email'),
+            'kindValue' => self::readKindValue($data),
+            'email' => ResponseField::nullableString($data, 'email'),
+            'telegramChatId' => ResponseField::nullableInt($data, 'telegram_chat_id'),
+            'telegramUserId' => ResponseField::nullableString($data, 'telegram_user_id'),
             'name' => ResponseField::nullableString($data, 'name'),
             'statusValue' => ResponseField::string($data, 'status'),
             'unsubscribedAt' => ResponseField::nullableInt($data, 'unsubscribed_at'),
@@ -48,9 +64,46 @@ class SubscriptionRecipientDTO extends DTO
         return $this->id;
     }
 
-    public function getEmail(): string
+    /**
+     * The raw value, also when this SDK version does not know it.
+     */
+    public function getKindValue(): string
+    {
+        return $this->kindValue;
+    }
+
+    /**
+     * Null when the service sends a value this SDK version does not know (see getKindValue()).
+     */
+    public function getKind(): ?RecipientKind
+    {
+        return RecipientKind::tryFrom($this->kindValue);
+    }
+
+    public function isTelegram(): bool
+    {
+        return $this->getKind() === RecipientKind::TELEGRAM;
+    }
+
+    /**
+     * Null for a Telegram recipient.
+     */
+    public function getEmail(): ?string
     {
         return $this->email;
+    }
+
+    public function getTelegramChatId(): ?int
+    {
+        return $this->telegramChatId;
+    }
+
+    /**
+     * The livesite user id the Telegram recipient was added by; null for a chat added by its id.
+     */
+    public function getTelegramUserId(): ?string
+    {
+        return $this->telegramUserId;
     }
 
     public function getName(): ?string
@@ -85,5 +138,18 @@ class SubscriptionRecipientDTO extends DTO
     public function getUnsubscribedAt(): ?int
     {
         return $this->unsubscribedAt;
+    }
+
+    /**
+     * @param  array<array-key, mixed>  $data
+     */
+    private static function readKindValue(array $data): string
+    {
+        $kindValue = ResponseField::nullableString($data, 'kind');
+        if ($kindValue === null) {
+            return self::LEGACY_KIND_VALUE;
+        }
+
+        return $kindValue;
     }
 }
