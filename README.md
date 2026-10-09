@@ -122,7 +122,7 @@ $subscription = $reportsClient->subscriptions()->create($accountId, Subscription
     'definitionId' => $definitionId,
     'channel' => SubscriptionChannel::TELEGRAM,
     'recipients' => [
-        RecipientRequestDTO::telegramUser($livesiteUserId, 'Owner'), // a livesite user with Telegram connected
+        RecipientRequestDTO::telegramUser($livesiteUserToken, 'Owner'), // a livesite user (by token) with Telegram connected
         RecipientRequestDTO::telegramChat($telegramChatId),          // a chat connected to the notifier bot
     ],
 ]), $actorId);
