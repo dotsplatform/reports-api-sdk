@@ -39,7 +39,7 @@ interface ReportRunsClient
     public function downloadPdf(string $accountId, string $definitionId, string $runId): string;
 
     /**
-     * A signed public URL of the report for a period.
+     * A public link to the report for a period. The page is generated and stored when the link is made and shows the data as of then (`ReportRunDTO::getGeneratedAt()`); call `regenerate()` to refresh it.
      */
     public function createShareLink(string $accountId, string $definitionId, ReportPeriodRequestDTO $request, ?string $actorId = null): ShareLinkDTO;
 

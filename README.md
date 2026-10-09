@@ -40,6 +40,8 @@ The client is split into groups:
 | `metrics()` | `listMetrics`, `listDimensions`, `listScopes` (cursor), `queryMetrics`, `getSnapshot` |
 | `reportDefinitions()` | `list`, `create`, `get`, `update`, `delete`, `duplicate`, `resetToTemplate`, `getData`, `listBlocks` |
 | `reportRuns()` | `list`, `create`, `get`, `downloadPdf` (bytes), `createShareLink`, `regenerate` (remakes the stored page and PDF; the link stays) |
+
+A run's page and PDF are generated and stored when the run is made: a share link shows the data as of `generated_at`, not live data. `regenerate` makes the files again with current data; the link stays.
 | `settings()` | `get`, `update` |
 | `subscriptions()` | `list`, `create`, `get`, `update`, `delete`, `sendNow`, `listDeliveries` (latest 100, newest first) |
 | `apiClients()` | `list`, `create` (the plain token is returned once), `revoke` |
