@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Description of RecipientRequestDTO.php
  *
  * One recipient in a subscription create or update body. A recipient has exactly one address, matching the
- * subscription channel: an email (email channel), or a Telegram chat id or a livesite user id (telegram channel).
+ * subscription channel: an email (email channel), or a Telegram chat id or a livesite user token (telegram channel).
  * Build it through email(), telegramChat() or telegramUser(); only the set address is sent.
  *
  * @copyright Copyright (c) DOTSPLATFORM, LLC
@@ -24,7 +24,7 @@ class RecipientRequestDTO extends DTO
     protected ?int $telegramChatId = null;
 
     /**
-     * The livesite user id (at most 64 characters); the service resolves the user's connected Telegram chat.
+     * The livesite user token (uuid, at most 64 characters) — notifier-bot identifies users by token; it resolves the user's connected Telegram chat.
      */
     protected ?string $telegramUserId = null;
 

@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Description of SubscriptionRecipientDTO.php
  *
  * One recipient of a subscription and whether reports still go to it. An email recipient has the email; a Telegram
- * recipient has the chat id and/or the livesite user id it was added by.
+ * recipient has the chat id and/or the livesite user token it was added by.
  *
  * @copyright Copyright (c) DOTSPLATFORM, LLC
  * @author    Bogdan Mamontov <bohdan.mamontov@dotsplatform.com>
@@ -99,7 +99,7 @@ class SubscriptionRecipientDTO extends DTO
     }
 
     /**
-     * The livesite user id the Telegram recipient was added by; null for a chat added by its id.
+     * The livesite user token (uuid) the Telegram recipient was added by; null for a chat added by its id.
      */
     public function getTelegramUserId(): ?string
     {
