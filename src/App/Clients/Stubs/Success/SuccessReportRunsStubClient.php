@@ -47,4 +47,9 @@ class SuccessReportRunsStubClient implements ReportRunsClient
     {
         return ShareLinkDTO::fromResponse(StubResponses::shareLink());
     }
+
+    public function regenerate(string $accountId, string $definitionId, string $runId, ?string $actorId = null): ReportRunDTO
+    {
+        return ReportRunDTO::fromResponse(StubResponses::reportRun($runId, 'ready'));
+    }
 }

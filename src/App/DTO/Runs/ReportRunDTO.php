@@ -44,6 +44,25 @@ class ReportRunDTO extends DTO
     protected int $createdAt;
 
     /**
+     * The link to the run's stored page; null without a link.
+     */
+    protected ?string $shareUrl = null;
+
+    /**
+     * When the run's files were last made (they show the data as of then); null until generated.
+     */
+    protected ?int $generatedAt = null;
+
+    protected bool $hasPage = false;
+
+    protected bool $hasPdf = false;
+
+    /**
+     * Why the last generation failed; the previous files stay.
+     */
+    protected ?string $filesError = null;
+
+    /**
      * @param  array<array-key, mixed>  $data
      */
     public static function fromResponse(array $data): static
@@ -59,6 +78,11 @@ class ReportRunDTO extends DTO
             'hasShareLink' => ResponseField::bool($data, 'has_share_link'),
             'expiresAt' => ResponseField::nullableInt($data, 'expires_at'),
             'createdAt' => ResponseField::int($data, 'created_at'),
+            'shareUrl' => ResponseField::nullableString($data, 'share_url'),
+            'generatedAt' => ResponseField::nullableInt($data, 'generated_at'),
+            'hasPage' => ResponseField::boolOrFalse($data, 'has_page'),
+            'hasPdf' => ResponseField::boolOrFalse($data, 'has_pdf'),
+            'filesError' => ResponseField::nullableString($data, 'files_error'),
         ]);
     }
 
@@ -147,5 +171,30 @@ class ReportRunDTO extends DTO
     public function getCreatedAt(): int
     {
         return $this->createdAt;
+    }
+
+    public function getShareUrl(): ?string
+    {
+        return $this->shareUrl;
+    }
+
+    public function getGeneratedAt(): ?int
+    {
+        return $this->generatedAt;
+    }
+
+    public function hasPage(): bool
+    {
+        return $this->hasPage;
+    }
+
+    public function hasPdf(): bool
+    {
+        return $this->hasPdf;
+    }
+
+    public function getFilesError(): ?string
+    {
+        return $this->filesError;
     }
 }

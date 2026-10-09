@@ -206,8 +206,13 @@ final class StubResponses
             'is_anonymised' => false,
             'status' => $status,
             'has_share_link' => true,
+            'share_url' => 'https://reports.dotsplatform.com/r/'.str_repeat('a', 48),
             'expires_at' => self::CREATED_AT + 90 * 86400,
             'created_at' => self::CREATED_AT,
+            'generated_at' => self::CREATED_AT,
+            'has_page' => true,
+            'has_pdf' => $status === 'pdf_ready',
+            'files_error' => null,
         ];
     }
 

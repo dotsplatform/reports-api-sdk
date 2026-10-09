@@ -42,4 +42,9 @@ interface ReportRunsClient
      * A signed public URL of the report for a period.
      */
     public function createShareLink(string $accountId, string $definitionId, ReportPeriodRequestDTO $request, ?string $actorId = null): ShareLinkDTO;
+
+    /**
+     * Makes the run's stored files again with current data; the link stays.
+     */
+    public function regenerate(string $accountId, string $definitionId, string $runId, ?string $actorId = null): ReportRunDTO;
 }

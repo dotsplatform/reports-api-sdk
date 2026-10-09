@@ -130,6 +130,20 @@ final class ResponseField
     }
 
     /**
+     * A boolean newer servers send; older ones leave it out.
+     *
+     * @param  array<array-key, mixed>  $data
+     */
+    public static function boolOrFalse(array $data, string $key): bool
+    {
+        if (! array_key_exists($key, $data)) {
+            return false;
+        }
+
+        return self::bool($data, $key);
+    }
+
+    /**
      * @param  array<array-key, mixed>  $data
      * @return array<array-key, mixed>
      */

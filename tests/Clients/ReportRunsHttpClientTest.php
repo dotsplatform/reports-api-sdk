@@ -87,6 +87,31 @@ class ReportRunsHttpClientTest extends HttpClientTestCase
         $this->assertSame(CompareMode::PREVIOUS_PERIOD, $run->getCompare());
     }
 
+    public function testRegeneratesARunInPlace(): void
+    {
+        $this->queueJsonResponse(['data' => StubResponses::reportRun(self::RUN, 'ready')]);
+
+        $run = $this->makeClient()->reportRuns()->regenerate(self::ACCOUNT, self::DEFINITION, self::RUN, 'staff');
+
+        $this->assertLastRequest('POST', self::RUNS_PATH.'/'.self::RUN.'/regenerate');
+        $this->assertTrue($run->hasPage());
+        $this->assertFalse($run->hasPdf());
+        $this->assertSame(StubResponses::CREATED_AT, $run->getGeneratedAt());
+        $this->assertStringContainsString('/r/', (string) $run->getShareUrl());
+    }
+
+    public function testAnOlderServerWithoutStoredFilesStillReads(): void
+    {
+        $olderRun = StubResponses::reportRun();
+        unset($olderRun['share_url'], $olderRun['generated_at'], $olderRun['has_page'], $olderRun['has_pdf'], $olderRun['files_error']);
+        $this->queueJsonResponse(['data' => $olderRun]);
+
+        $run = $this->makeClient()->reportRuns()->get(self::ACCOUNT, self::DEFINITION, self::RUN);
+
+        $this->assertFalse($run->hasPage());
+        $this->assertNull($run->getShareUrl());
+    }
+
     public function testDownloadsThePdfBytes(): void
     {
         $this->queueRawResponse(StubResponses::PDF_BYTES, 200, 'application/pdf');
