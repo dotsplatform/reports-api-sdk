@@ -223,9 +223,13 @@ final class StubResponses
      */
     public static function accountRunsPage(): array
     {
+        $run = self::reportRun();
+        // The list never carries share links: get() returns one run's link.
+        unset($run['share_url']);
+
         return [
             'data' => [[
-                ...self::reportRun(),
+                ...$run,
                 'definition' => ['id' => self::DEFINITION_ID, 'name' => 'Monthly report', 'purpose' => 'owner', 'template_key' => 'pro_monthly'],
                 'period_label' => 'Вересень 2026',
             ]],

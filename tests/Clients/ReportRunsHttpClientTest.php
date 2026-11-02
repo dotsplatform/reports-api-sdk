@@ -107,6 +107,8 @@ class ReportRunsHttpClientTest extends HttpClientTestCase
         $this->assertSame('pro_monthly', $accountRun->getDefinition()->getTemplateKey());
         $this->assertSame(ReportPurpose::OWNER, $accountRun->getDefinition()->getPurpose());
         $this->assertSame('Вересень 2026', $accountRun->getPeriodLabel());
+        $this->assertTrue($accountRun->getRun()->hasShareLink());
+        $this->assertNull($accountRun->getRun()->getShareUrl());
 
         $request = ListAccountRunsRequestDTO::fromArray([
             'definitionId' => self::DEFINITION,

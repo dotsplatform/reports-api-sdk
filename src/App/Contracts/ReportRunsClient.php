@@ -30,7 +30,8 @@ interface ReportRunsClient
 
     /**
      * The account's runs of every definition it may open, newest first, a page at a time (parent runs only: a run per
-     * promo code lives under its parent). Each run carries its definition and its period label.
+     * promo code lives under its parent). Each run carries its definition and its period label, but not its share URL:
+     * get() returns that for one run.
      */
     public function listForAccount(string $accountId, ?ListAccountRunsRequestDTO $request = null): AccountRunsPageDTO;
 
