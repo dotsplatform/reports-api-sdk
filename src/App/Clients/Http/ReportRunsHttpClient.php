@@ -12,9 +12,11 @@ declare(strict_types=1);
 namespace Dotsplatform\ReportsApi\Clients\Http;
 
 use Dotsplatform\ReportsApi\Contracts\ReportRunsClient;
+use Dotsplatform\ReportsApi\DTO\Runs\AccountRunsPageDTO;
 use Dotsplatform\ReportsApi\DTO\Runs\CreatedReportRunDTO;
 use Dotsplatform\ReportsApi\DTO\Runs\ReportRunDTO;
 use Dotsplatform\ReportsApi\DTO\Runs\Requests\CreateReportRunRequestDTO;
+use Dotsplatform\ReportsApi\DTO\Runs\Requests\ListAccountRunsRequestDTO;
 use Dotsplatform\ReportsApi\DTO\Runs\Requests\ReportPeriodRequestDTO;
 use Dotsplatform\ReportsApi\DTO\Runs\ShareLinkDTO;
 use Dotsplatform\ReportsApi\Http\ReportsHttpTransport;
@@ -23,6 +25,8 @@ use Dotsplatform\ReportsApi\Support\ResponseField;
 class ReportRunsHttpClient implements ReportRunsClient
 {
     private const string RUNS_URL_TEMPLATE = 'api/v1/accounts/%s/report-definitions/%s/runs';
+
+    private const string ACCOUNT_RUNS_URL_TEMPLATE = 'api/v1/accounts/%s/runs';
 
     private const string RUN_URL_TEMPLATE = 'api/v1/accounts/%s/report-definitions/%s/runs/%s';
 
@@ -48,6 +52,17 @@ class ReportRunsHttpClient implements ReportRunsClient
         }
 
         return $runs;
+    }
+
+    public function listForAccount(string $accountId, ?ListAccountRunsRequestDTO $request = null): AccountRunsPageDTO
+    {
+        $path = $this->transport->buildPath(self::ACCOUNT_RUNS_URL_TEMPLATE, $accountId);
+        $query = [];
+        if ($request !== null) {
+            $query = $request->toQuery();
+        }
+
+        return AccountRunsPageDTO::fromResponse($this->transport->getJson($path, $query));
     }
 
     public function create(string $accountId, string $definitionId, CreateReportRunRequestDTO $request, ?string $actorId = null): CreatedReportRunDTO

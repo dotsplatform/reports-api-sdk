@@ -217,6 +217,23 @@ final class StubResponses
     }
 
     /**
+     * GET accounts/{account}/runs: one run of a library layout, the last page.
+     *
+     * @return array<string, mixed>
+     */
+    public static function accountRunsPage(): array
+    {
+        return [
+            'data' => [[
+                ...self::reportRun(),
+                'definition' => ['id' => self::DEFINITION_ID, 'name' => 'Monthly report', 'purpose' => 'owner', 'template_key' => 'pro_monthly'],
+                'period_label' => 'Вересень 2026',
+            ]],
+            'next_cursor' => null,
+        ];
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public static function createdReportRun(): array

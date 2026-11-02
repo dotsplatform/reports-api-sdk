@@ -15,9 +15,11 @@ namespace Dotsplatform\ReportsApi\Tests\Clients;
 
 use Dotsplatform\ReportsApi\Clients\Stubs\StubResponses;
 use Dotsplatform\ReportsApi\DTO\Runs\Requests\CreateReportRunRequestDTO;
+use Dotsplatform\ReportsApi\DTO\Runs\Requests\ListAccountRunsRequestDTO;
 use Dotsplatform\ReportsApi\DTO\Runs\Requests\ReportPeriodRequestDTO;
 use Dotsplatform\ReportsApi\Enums\CompareMode;
 use Dotsplatform\ReportsApi\Enums\Grain;
+use Dotsplatform\ReportsApi\Enums\ReportPurpose;
 use Dotsplatform\ReportsApi\Enums\ReportRunStatus;
 use Dotsplatform\ReportsApi\Enums\ScopeType;
 use Dotsplatform\ReportsApi\Exceptions\ReportsNotFoundException;
@@ -85,6 +87,40 @@ class ReportRunsHttpClientTest extends HttpClientTestCase
         $this->assertLastRequest('GET', self::RUNS_PATH.'/'.self::RUN);
         $this->assertTrue($run->isPdfReady());
         $this->assertSame(CompareMode::PREVIOUS_PERIOD, $run->getCompare());
+    }
+
+    public function testListsTheAccountsRunsAPageAtATime(): void
+    {
+        $page = StubResponses::accountRunsPage();
+        $page['next_cursor'] = 'MTc5MzAwMDAwMHwwMTk5';
+        $this->queueJsonResponse($page);
+        $this->queueJsonResponse(StubResponses::accountRunsPage());
+
+        $firstPage = $this->makeClient()->reportRuns()->listForAccount(self::ACCOUNT);
+        $this->assertLastRequest('GET', '/api/v1/accounts/'.self::ACCOUNT.'/runs');
+        $this->assertSame([], $this->getLastRequestQuery());
+        $this->assertTrue($firstPage->hasNextPage());
+        $this->assertCount(1, $firstPage->getRuns());
+        $accountRun = $firstPage->getRuns()[0];
+        $this->assertSame(self::RUN, $accountRun->getRun()->getId());
+        $this->assertSame(self::DEFINITION, $accountRun->getDefinition()->getId());
+        $this->assertSame('pro_monthly', $accountRun->getDefinition()->getTemplateKey());
+        $this->assertSame(ReportPurpose::OWNER, $accountRun->getDefinition()->getPurpose());
+        $this->assertSame('Вересень 2026', $accountRun->getPeriodLabel());
+
+        $request = ListAccountRunsRequestDTO::fromArray([
+            'definitionId' => self::DEFINITION,
+            'grain' => Grain::MONTH,
+            'periodKey' => '2026-09',
+            'cursor' => $firstPage->getNextCursor(),
+            'limit' => 10,
+        ]);
+        $secondPage = $this->makeClient()->reportRuns()->listForAccount(self::ACCOUNT, $request);
+        $this->assertSame(
+            ['definition_id' => self::DEFINITION, 'grain' => 'month', 'period_key' => '2026-09', 'cursor' => 'MTc5MzAwMDAwMHwwMTk5', 'limit' => '10'],
+            $this->getLastRequestQuery(),
+        );
+        $this->assertFalse($secondPage->hasNextPage());
     }
 
     public function testRegeneratesARunInPlace(): void

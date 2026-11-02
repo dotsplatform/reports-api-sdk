@@ -15,9 +15,11 @@ namespace Dotsplatform\ReportsApi\Clients\Stubs\Success;
 
 use Dotsplatform\ReportsApi\Clients\Stubs\StubResponses;
 use Dotsplatform\ReportsApi\Contracts\ReportRunsClient;
+use Dotsplatform\ReportsApi\DTO\Runs\AccountRunsPageDTO;
 use Dotsplatform\ReportsApi\DTO\Runs\CreatedReportRunDTO;
 use Dotsplatform\ReportsApi\DTO\Runs\ReportRunDTO;
 use Dotsplatform\ReportsApi\DTO\Runs\Requests\CreateReportRunRequestDTO;
+use Dotsplatform\ReportsApi\DTO\Runs\Requests\ListAccountRunsRequestDTO;
 use Dotsplatform\ReportsApi\DTO\Runs\Requests\ReportPeriodRequestDTO;
 use Dotsplatform\ReportsApi\DTO\Runs\ShareLinkDTO;
 
@@ -26,6 +28,11 @@ class SuccessReportRunsStubClient implements ReportRunsClient
     public function list(string $accountId, string $definitionId): array
     {
         return [ReportRunDTO::fromResponse(StubResponses::reportRun())];
+    }
+
+    public function listForAccount(string $accountId, ?ListAccountRunsRequestDTO $request = null): AccountRunsPageDTO
+    {
+        return AccountRunsPageDTO::fromResponse(StubResponses::accountRunsPage());
     }
 
     public function create(string $accountId, string $definitionId, CreateReportRunRequestDTO $request, ?string $actorId = null): CreatedReportRunDTO

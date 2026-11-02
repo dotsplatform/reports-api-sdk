@@ -80,6 +80,7 @@ class StubClientsTest extends TestCase
         $this->assertNotNull($reportsClient->reportRuns()->create(self::ACCOUNT, self::DEFINITION, CreateReportRunRequestDTO::fromArray(['grain' => Grain::MONTH, 'periodKey' => '2026-09']))->getShareUrl());
         $this->assertTrue($reportsClient->reportRuns()->get(self::ACCOUNT, self::DEFINITION, StubResponses::RUN_ID)->isPdfReady());
         $this->assertCount(1, $reportsClient->reportRuns()->list(self::ACCOUNT, self::DEFINITION));
+        $this->assertSame('Вересень 2026', $reportsClient->reportRuns()->listForAccount(self::ACCOUNT)->getRuns()[0]->getPeriodLabel());
         $this->assertSame(StubResponses::PDF_BYTES, $reportsClient->reportRuns()->downloadPdf(self::ACCOUNT, self::DEFINITION, StubResponses::RUN_ID));
         $this->assertSame(StubResponses::RUN_ID, $reportsClient->reportRuns()->createShareLink(self::ACCOUNT, self::DEFINITION, $period)->getRunId());
 
@@ -137,6 +138,7 @@ class StubClientsTest extends TestCase
         yield 'reportDefinitions.getData' => [fn (ReportsClient $client): mixed => $client->reportDefinitions()->getData($account, $definition)];
         yield 'reportDefinitions.listBlocks' => [fn (ReportsClient $client): mixed => $client->reportDefinitions()->listBlocks($account)];
         yield 'reportRuns.list' => [fn (ReportsClient $client): mixed => $client->reportRuns()->list($account, $definition)];
+        yield 'reportRuns.listForAccount' => [fn (ReportsClient $client): mixed => $client->reportRuns()->listForAccount($account)];
         yield 'reportRuns.create' => [fn (ReportsClient $client): mixed => $client->reportRuns()->create($account, $definition, CreateReportRunRequestDTO::fromArray(['grain' => Grain::MONTH, 'periodKey' => '2026-09']))];
         yield 'reportRuns.get' => [fn (ReportsClient $client): mixed => $client->reportRuns()->get($account, $definition, $run)];
         yield 'reportRuns.downloadPdf' => [fn (ReportsClient $client): mixed => $client->reportRuns()->downloadPdf($account, $definition, $run)];

@@ -13,9 +13,11 @@ declare(strict_types=1);
 
 namespace Dotsplatform\ReportsApi\Contracts;
 
+use Dotsplatform\ReportsApi\DTO\Runs\AccountRunsPageDTO;
 use Dotsplatform\ReportsApi\DTO\Runs\CreatedReportRunDTO;
 use Dotsplatform\ReportsApi\DTO\Runs\ReportRunDTO;
 use Dotsplatform\ReportsApi\DTO\Runs\Requests\CreateReportRunRequestDTO;
+use Dotsplatform\ReportsApi\DTO\Runs\Requests\ListAccountRunsRequestDTO;
 use Dotsplatform\ReportsApi\DTO\Runs\Requests\ReportPeriodRequestDTO;
 use Dotsplatform\ReportsApi\DTO\Runs\ShareLinkDTO;
 
@@ -25,6 +27,12 @@ interface ReportRunsClient
      * @return list<ReportRunDTO>
      */
     public function list(string $accountId, string $definitionId): array;
+
+    /**
+     * The account's runs of every definition it may open, newest first, a page at a time (parent runs only: a run per
+     * promo code lives under its parent). Each run carries its definition and its period label.
+     */
+    public function listForAccount(string $accountId, ?ListAccountRunsRequestDTO $request = null): AccountRunsPageDTO;
 
     /**
      * Freezes the report for a period; optionally creates a share link and queues the PDF.

@@ -39,7 +39,7 @@ The client is split into groups:
 |---|---|
 | `metrics()` | `listMetrics`, `listDimensions`, `listScopes` (cursor), `queryMetrics`, `getSnapshot` |
 | `reportDefinitions()` | `list`, `create`, `get`, `update`, `delete`, `duplicate`, `resetToTemplate`, `getData`, `listBlocks` |
-| `reportRuns()` | `list`, `create`, `get`, `downloadPdf` (bytes), `createShareLink`, `regenerate` (remakes the stored page and PDF; the link stays) |
+| `reportRuns()` | `list`, `listForAccount` (every definition's runs of an account, newest first, cursor pages, with the definition and the period label), `create`, `get`, `downloadPdf` (bytes), `createShareLink`, `regenerate` (remakes the stored page and PDF; the link stays) |
 
 A run's page and PDF are generated and stored when the run is made: a share link shows the data as of `generated_at`, not live data. `regenerate` makes the files again with current data; the link stays.
 | `settings()` | `get`, `update` |
