@@ -34,6 +34,8 @@ class ReportRunsHttpClient implements ReportRunsClient
 
     private const string RUN_REGENERATE_URL_TEMPLATE = 'api/v1/accounts/%s/report-definitions/%s/runs/%s/regenerate';
 
+    private const string RUN_SHARE_LINK_URL_TEMPLATE = 'api/v1/accounts/%s/report-definitions/%s/runs/%s/share-link';
+
     private const string SHARE_LINKS_URL_TEMPLATE = 'api/v1/accounts/%s/report-definitions/%s/share-links';
 
     public function __construct(
@@ -92,6 +94,14 @@ class ReportRunsHttpClient implements ReportRunsClient
     {
         $path = $this->transport->buildPath(self::SHARE_LINKS_URL_TEMPLATE, $accountId, $definitionId);
         $response = $this->transport->postJson($path, $request->toRequestBody(), $actorId);
+
+        return ShareLinkDTO::fromResponse(ResponseField::array($response, 'data'));
+    }
+
+    public function ensureShareLink(string $accountId, string $definitionId, string $runId, ?string $actorId = null): ShareLinkDTO
+    {
+        $path = $this->transport->buildPath(self::RUN_SHARE_LINK_URL_TEMPLATE, $accountId, $definitionId, $runId);
+        $response = $this->transport->postJson($path, [], $actorId);
 
         return ShareLinkDTO::fromResponse(ResponseField::array($response, 'data'));
     }

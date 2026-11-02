@@ -53,6 +53,12 @@ interface ReportRunsClient
     public function createShareLink(string $accountId, string $definitionId, ReportPeriodRequestDTO $request, ?string $actorId = null): ShareLinkDTO;
 
     /**
+     * A link for an existing run, without a second run: its live link unchanged, or a new token on the same run when it
+     * has none or it expired (valid for the definition's share_link_days). Not for the run of one promo code (404).
+     */
+    public function ensureShareLink(string $accountId, string $definitionId, string $runId, ?string $actorId = null): ShareLinkDTO;
+
+    /**
      * Makes the run's stored files again with current data; the link stays.
      */
     public function regenerate(string $accountId, string $definitionId, string $runId, ?string $actorId = null): ReportRunDTO;

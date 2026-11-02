@@ -54,6 +54,11 @@ class FailReportRunsStubClient implements ReportRunsClient
         throw StubFailure::make();
     }
 
+    public function ensureShareLink(string $accountId, string $definitionId, string $runId, ?string $actorId = null): ShareLinkDTO
+    {
+        throw StubFailure::make();
+    }
+
     public function regenerate(string $accountId, string $definitionId, string $runId, ?string $actorId = null): ReportRunDTO
     {
         throw StubFailure::make();

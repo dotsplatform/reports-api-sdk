@@ -138,6 +138,7 @@ class StubClientsTest extends TestCase
         yield 'reportDefinitions.getData' => [fn (ReportsClient $client): mixed => $client->reportDefinitions()->getData($account, $definition)];
         yield 'reportDefinitions.listBlocks' => [fn (ReportsClient $client): mixed => $client->reportDefinitions()->listBlocks($account)];
         yield 'reportRuns.list' => [fn (ReportsClient $client): mixed => $client->reportRuns()->list($account, $definition)];
+        yield 'reportRuns.ensureShareLink' => [fn (ReportsClient $client): mixed => $client->reportRuns()->ensureShareLink($account, $definition, StubResponses::RUN_ID)];
         yield 'reportRuns.listForAccount' => [fn (ReportsClient $client): mixed => $client->reportRuns()->listForAccount($account)];
         yield 'reportRuns.create' => [fn (ReportsClient $client): mixed => $client->reportRuns()->create($account, $definition, CreateReportRunRequestDTO::fromArray(['grain' => Grain::MONTH, 'periodKey' => '2026-09']))];
         yield 'reportRuns.get' => [fn (ReportsClient $client): mixed => $client->reportRuns()->get($account, $definition, $run)];

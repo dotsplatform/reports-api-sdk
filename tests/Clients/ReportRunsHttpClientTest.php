@@ -125,6 +125,17 @@ class ReportRunsHttpClientTest extends HttpClientTestCase
         $this->assertFalse($secondPage->hasNextPage());
     }
 
+    public function testEnsuresALinkOnAnExistingRun(): void
+    {
+        $this->queueJsonResponse(['data' => StubResponses::shareLink()], 201);
+
+        $shareLink = $this->makeClient()->reportRuns()->ensureShareLink(self::ACCOUNT, self::DEFINITION, self::RUN, 'workspace');
+
+        $this->assertLastRequest('POST', self::RUNS_PATH.'/'.self::RUN.'/share-link');
+        $this->assertSame(self::RUN, $shareLink->getRunId());
+        $this->assertStringContainsString('/r/', $shareLink->getUrl());
+    }
+
     public function testRegeneratesARunInPlace(): void
     {
         $this->queueJsonResponse(['data' => StubResponses::reportRun(self::RUN, 'ready')]);
